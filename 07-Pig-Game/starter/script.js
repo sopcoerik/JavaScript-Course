@@ -32,7 +32,7 @@ dice.classList.add('hidden');
 
 //endgame
 const endgame = function () {
-  if (finalScore[activePlayer] >= 20) {
+  if (finalScore[activePlayer] >= 100) {
     document
       .querySelector(`.player--${activePlayer}`)
       .classList.add('player--winner');
