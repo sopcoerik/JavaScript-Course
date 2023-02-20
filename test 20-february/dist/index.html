@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./css/main.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    <title>X&O - Test</title>
+  </head>
+  <body>
+    <header>
+      <div class="scores-menu">
+        <div class="player--X active--player">
+          <p>Player X:</p>
+          <p><span class="score--X">0</span> games won</p>
+        </div>
+        <div class="player--O">
+          <p>Player O:</p>
+          <p><span class="score--O">0</span> games won</p>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <div class="cells">
+        <div class="cell" id="cell-0"></div>
+        <div class="cell" id="cell-1"></div>
+        <div class="cell" id="cell-2"></div>
+        <div class="cell" id="cell-3"></div>
+        <div class="cell" id="cell-4"></div>
+        <div class="cell" id="cell-5"></div>
+        <div class="cell" id="cell-6"></div>
+        <div class="cell" id="cell-7"></div>
+        <div class="cell" id="cell-8"></div>
+      </div>
+      <div class="hidden" id="restart">
+        <p>Player with <span class="winner"></span> wins!</p>
+        <input class="button" type="button" value="Restart" />
+      </div>
+    </main>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
