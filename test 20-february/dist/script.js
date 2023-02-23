@@ -53,7 +53,9 @@ const handleCellClicked = (cellElement) => {
   if (game) {
     addMove(cellElement);
 
-    cellElement.textContent = activePlayer;
+    addImageToElement(activePlayer, cellElement);
+
+    //cellElement.textContent = activePlayer;
 
     if (isWinner(moves[activePlayer], WINNING_COMBINATIONS)) {
       winner.textContent = activePlayer;
@@ -127,3 +129,10 @@ const addResetListener = () => {
 
 addCellsHandler();
 addResetListener();
+
+const addImageToElement = (activePlayer, cellElement) => {
+  const img = document.createElement("div");
+  activePlayer === "X" ? img.classList.add("x") : img.classList.add("o");
+
+  cellElement.append(img);
+};
