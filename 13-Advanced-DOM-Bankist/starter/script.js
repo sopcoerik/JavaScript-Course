@@ -13,6 +13,8 @@ const sections = document.querySelectorAll('.section');
 const operationsTabAll = document.querySelectorAll('.operations__tab');
 const operationsContentAll = document.querySelectorAll('.operations__content');
 const header = document.querySelector('header');
+const imgs = document.querySelectorAll('.features__img');
+const 
 ///////////////////////////////////////
 // Modal window
 
@@ -150,3 +152,24 @@ const headerObserver = new IntersectionObserver(
 );
 
 headerObserver.observe(header);
+
+imgs.forEach(img => {
+  const imgsObsCallback = function (entries) {
+    const [entry] = entries;
+    if (entry.isIntersecting) {
+      img.classList.remove('lazy-img');
+      img.src = img.dataset.src;
+    }
+  };
+
+  const imgsObsOptions = {
+    root: null,
+    threshold: 0.7,
+  };
+
+  const imgsObserver = new IntersectionObserver(
+    imgsObsCallback,
+    imgsObsOptions
+  );
+  imgsObserver.observe(img);
+});
