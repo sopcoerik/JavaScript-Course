@@ -14,7 +14,10 @@ const operationsTabAll = document.querySelectorAll('.operations__tab');
 const operationsContentAll = document.querySelectorAll('.operations__content');
 const header = document.querySelector('header');
 const imgs = document.querySelectorAll('.features__img');
-const 
+const btnLeft = document.querySelector('.slider__btn--left');
+const btnRight = document.querySelector('.slider__btn--right');
+const slides = document.querySelectorAll('.slide');
+const dots = document.querySelector('.dots');
 ///////////////////////////////////////
 // Modal window
 
@@ -124,7 +127,7 @@ const navHeight = nav.getBoundingClientRect().height;
 
 const section1BarObsOptions = {
   root: null,
-  threshold: 0.6,
+  threshold: 0.5,
   rootMargin: `${navHeight}px`,
 };
 
@@ -172,4 +175,38 @@ imgs.forEach(img => {
     imgsObsOptions
   );
   imgsObserver.observe(img);
+});
+
+slides.forEach((slide, index) => {
+  slide.style.transform = `translateX(${index * 100}%)`;
+});
+
+let currentSlide = 0;
+const maxSlides = slides.length;
+
+const slideRight = () => {
+  currentSlide === maxSlides - 1 ? (currentSlide = 0) : currentSlide++;
+
+  slides.forEach(
+    (slide, index) =>
+      (slide.style.transform = `translateX(${100 * (index - currentSlide)}%)`)
+  );
+};
+
+const slideLeft = () => {
+  currentSlide === 0 ? (currentSlide = maxSlides - 1) : currentSlide--;
+
+  slides.forEach(
+    (slide, index) =>
+      (slide.style.transform = `translateX(${100 * (index - currentSlide)}%)`)
+  );
+};
+
+btnRight.addEventListener('click', slideRight);
+
+btnLeft.addEventListener('click', slideLeft);
+
+document.addEventListener('keydown', function (e) {
+  e.key === 'ArrowRight' && slideRight();
+  e.key === 'ArrowLeft' && slideLeft();
 });
