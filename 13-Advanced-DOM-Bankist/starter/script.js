@@ -17,7 +17,7 @@ const imgs = document.querySelectorAll('.features__img');
 const btnLeft = document.querySelector('.slider__btn--left');
 const btnRight = document.querySelector('.slider__btn--right');
 const slides = document.querySelectorAll('.slide');
-const dots = document.querySelector('.dots');
+const dotContainer = document.querySelector('.dots');
 ///////////////////////////////////////
 // Modal window
 
@@ -184,8 +184,37 @@ slides.forEach((slide, index) => {
 let currentSlide = 0;
 const maxSlides = slides.length;
 
+// Added the dots to the slider
+const addSliderDots = () => {
+  slides.forEach(slide => {
+    const dot = document.createElement('div');
+    dot.classList.add('dots__dot');
+    dotContainer.appendChild(dot);
+  });
+};
+addSliderDots();
+
+const dots = document.querySelectorAll('.dots__dot');
+
+// Added id's to the dots
+slides.forEach((slide, i) => {
+  dots[i].setAttribute('id', `${slide.classList.value.split('--')[1]}`);
+});
+
+// For activating dots based on active slide
+const activateDot = () => {
+  dots.forEach(dot => dot.classList.remove('dots__dot--active'));
+  dots[currentSlide].classList.add('dots__dot--active');
+};
+
+// Initial active dot based on initial active slide
+dots[currentSlide].classList.add('dots__dot--active');
+
+// Sliding right
 const slideRight = () => {
   currentSlide === maxSlides - 1 ? (currentSlide = 0) : currentSlide++;
+
+  activateDot();
 
   slides.forEach(
     (slide, index) =>
@@ -193,8 +222,11 @@ const slideRight = () => {
   );
 };
 
+// Sliding left
 const slideLeft = () => {
   currentSlide === 0 ? (currentSlide = maxSlides - 1) : currentSlide--;
+
+  activateDot();
 
   slides.forEach(
     (slide, index) =>
@@ -209,4 +241,20 @@ btnLeft.addEventListener('click', slideLeft);
 document.addEventListener('keydown', function (e) {
   e.key === 'ArrowRight' && slideRight();
   e.key === 'ArrowLeft' && slideLeft();
+});
+
+//Changing slides by clicking on dots
+dotContainer.addEventListener('click', function (e) {
+  if (e.target.classList.contains('dots__dot')) {
+    currentSlide = e.target.getAttribute('id');
+
+    currentSlide === 0 ? (currentSlide = maxSlides - 1) : currentSlide--;
+
+    activateDot();
+    console.log(currentSlide);
+    slides.forEach(
+      (slide, index) =>
+        (slide.style.transform = `translateX(${100 * (index - currentSlide)}%)`)
+    );
+  }
 });
