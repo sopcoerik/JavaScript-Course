@@ -192,71 +192,80 @@ imgs.forEach(img => {
   imgsObserver.observe(img);
 });
 
-///////////////////////////////////////
-// initial state of slides
-slides.forEach((slide, index) => {
-  slide.style.transform = `translateX(${index * 100}%)`;
-});
+const getIdFromElementClass = function (element) {
+  return element.classList.value.split('--')[1];
+};
 
 ///////////////////////////////////////
-// Initialized 'current slide' and 'maximum slide' variables
-let currentSlide = 0;
+// Initial state of slides and dots
+slides.forEach((slide, index) => {
+  slide.style.transform = `translateX(${index * 100}%)`;
+  const dot = document.createElement('div');
+  dot.classList.add('dots__dot');
+  dot.setAttribute('id', `${getIdFromElementClass(slide)}`);
+  dotContainer.appendChild(dot);
+});
+
+const dots = document.querySelectorAll('.dots__dot');
+let currentSlideId = getIdFromElementClass(slides[0]);
 const maxSlides = slides.length;
 
 ///////////////////////////////////////
-// Added the dots to the slider
-const addSliderDots = () => {
-  slides.forEach(slide => {
-    const dot = document.createElement('div');
-    dot.classList.add('dots__dot');
-    dotContainer.appendChild(dot);
+// For activating dots based on active slide
+const updateActiveDotFromCurrentSlide = () => {
+  dots.forEach(dot => {
+    dot.classList.remove('dots__dot--active');
+    if (dot.getAttribute('id') == currentSlideId)
+      dot.classList.add('dots__dot--active');
   });
 };
-addSliderDots();
 
-const dots = document.querySelectorAll('.dots__dot');
+updateActiveDotFromCurrentSlide();
 
-///////////////////////////////////////
-// Added id's to the dots
-slides.forEach((slide, i) => {
-  dots[i].setAttribute('id', `${slide.classList.value.split('--')[1]}`);
-});
+const updateCurrentActiveSlideId = increment => {
+  let currentActiveSlideIndex = Array.from(slides).findIndex(
+    slide => getIdFromElementClass(slide) == currentSlideId
+  );
+  if (increment > 0) {
+    if (currentActiveSlideIndex >= maxSlides - 1) currentActiveSlideIndex = 0;
+    else currentActiveSlideIndex++;
+  } else {
+    if (currentActiveSlideIndex <= 0) currentActiveSlideIndex = maxSlides - 1;
+    else currentActiveSlideIndex--;
+  }
 
-///////////////////////////////////////
-// For activating dots based on active slide
-const activateDot = () => {
-  dots.forEach(dot => dot.classList.remove('dots__dot--active'));
-  dots[currentSlide].classList.add('dots__dot--active');
+  currentSlideId = getIdFromElementClass(slides[currentActiveSlideIndex]);
 };
-
-///////////////////////////////////////
-// Initial active dot based on initial active slide
-dots[currentSlide].classList.add('dots__dot--active');
 
 ///////////////////////////////////////
 // Sliding right
-const slideRight = () => {
-  currentSlide === maxSlides - 1 ? (currentSlide = 0) : currentSlide++;
-
-  activateDot();
-
-  slides.forEach(
-    (slide, index) =>
-      (slide.style.transform = `translateX(${100 * (index - currentSlide)}%)`)
+const getCurrentSlideIndex = () => {
+  //currentSlideId
+  //slides array
+  return [...slides].findIndex(
+    element => getIdFromElementClass(element) === currentSlideId
   );
+};
+
+const slideRight = () => {
+  updateCurrentActiveSlideId(1);
+  updateActiveDotFromCurrentSlide();
+  const currentSlideIndex = getCurrentSlideIndex();
+  slides.forEach((slide, index) => {
+    slide.style.transform = `translateX(${100 * (index - currentSlideIndex)}%)`;
+  });
 };
 
 ///////////////////////////////////////
 // Sliding left
 const slideLeft = () => {
-  currentSlide === 0 ? (currentSlide = maxSlides - 1) : currentSlide--;
+  updateCurrentActiveSlideId(-1);
+  updateActiveDotFromCurrentSlide();
+  const currentSlideIndex = getCurrentSlideIndex();
 
-  activateDot();
-
-  slides.forEach(
-    (slide, index) =>
-      (slide.style.transform = `translateX(${100 * (index - currentSlide)}%)`)
-  );
+  slides.forEach((slide, index) => {
+    slide.style.transform = `translateX(${100 * (index - currentSlideIndex)}%)`;
+  });
 };
 
 btnRight.addEventListener('click', slideRight);
@@ -270,17 +279,17 @@ document.addEventListener('keydown', function (e) {
 
 ///////////////////////////////////////
 //Changing slides by clicking on dots
-dotContainer.addEventListener('click', function (e) {
-  if (e.target.classList.contains('dots__dot')) {
-    currentSlide = e.target.getAttribute('id');
 
-    currentSlide === 0 ? (currentSlide = maxSlides - 1) : currentSlide--;
+const onDotClick = e => {
+  const dotId = e.target.getAttribute('id');
+  currentSlideId = dotId;
+  updateActiveDotFromCurrentSlide();
 
-    activateDot();
+  slides.forEach((slide, index) => {
+    slide.style.transform = `translateX(-${100 * index}%)`;
+  });
+};
 
-    slides.forEach(
-      (slide, index) =>
-        (slide.style.transform = `translateX(${100 * (index - currentSlide)}%)`)
-    );
-  }
+dots.forEach(dot => {
+  dot.addEventListener('click', onDotClick);
 });
