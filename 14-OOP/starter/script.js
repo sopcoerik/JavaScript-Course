@@ -39,20 +39,20 @@
 // OOP Coding Challenge #1
 
 // My solution
-const Car = function (make, speed) {
-  this.speed = speed;
-  this.make = make;
-};
+// const Car = function (make, speed) {
+//   this.speed = speed;
+//   this.make = make;
+// };
 
-Car.prototype.accelerate = function () {
-  return this.speed + 10;
-};
-Car.prototype.break = function () {
-  return this.speed - 5;
-};
+// Car.prototype.accelerate = function () {
+//   return this.speed + 10;
+// };
+// Car.prototype.break = function () {
+//   return this.speed - 5;
+// };
 
-const bmw = new Car('BMW', 120);
-const mercedes = new Car('Mercedes', 95);
+// const bmw = new Car('BMW', 120);
+// const mercedes = new Car('Mercedes', 95);
 
 // console.log(`The BMW now has accelerated to ${bmw.accelerate()}`);
 // console.log(`The Mercedes now has deaccelerated to ${mercedes.break()}`);
@@ -61,14 +61,14 @@ const mercedes = new Car('Mercedes', 95);
 // console.log(bmw.make);
 
 //Instructor's solution
-Car.prototype.accelerate = function () {
-  this.speed += 10;
-  console.log(`${this.make} is going at ${this.speed}km/h`);
-};
-Car.prototype.break = function () {
-  this.speed -= 5;
-  console.log(`${this.make} is going at ${this.speed}km/h`);
-};
+// Car.prototype.accelerate = function () {
+//   this.speed += 10;
+//   console.log(`${this.make} is going at ${this.speed}km/h`);
+// };
+// Car.prototype.break = function () {
+//   this.speed -= 5;
+//   console.log(`${this.make} is going at ${this.speed}km/h`);
+// };
 
 // bmw.accelerate();
 // bmw.accelerate();
@@ -176,53 +176,128 @@ class Personnel {
 // erik.newResponsibility = 'working faster';
 // console.log(erik.latestResponsibility);
 
-const Class = function (prop1, prop2) {
-  this.prop1 = prop1;
-  this.prop2 = prop2;
-};
+// const Class = function (prop1, prop2) {
+//   this.prop1 = prop1;
+//   this.prop2 = prop2;
+// };
 
-const newObj = new Class('four legs', 'round');
-console.log(newObj);
+// const newObj = new Class('four legs', 'round');
+// console.log(newObj);
 
-Class.hey = function () {
-  console.log(`👋`);
-};
+// Class.hey = function () {
+//   console.log(`👋`);
+// };
 
-Class.hey();
+// Class.hey();
 
-Personnel.hey();
+// Personnel.hey();
 
 // Coding Challenge #2
 
 // My version
 
-class CarCl {
-  constructor(make, speed) {
-    this.make = make;
-    this.speed = speed;
-  }
+// class CarCl {
+//   constructor(make, speed) {
+//     this.make = make;
+//     this.speed = speed;
+//   }
 
-  get speedUS() {
-    return `Speed in mi/h: ${this.speed / 1.6}`;
-  }
+//   get speedUS() {
+//     return `Speed in mi/h: ${this.speed / 1.6}`;
+//   }
 
-  set speedUS(speed) {
-    this.speed = speed * 1.6;
-  }
+//   set speedUS(speed) {
+//     this.speed = speed * 1.6;
+//   }
 
-  accelerate() {
-    this.speed += 10;
-  }
+//   accelerate() {
+//     this.speed += 10;
+//   }
 
-  break() {
-    this.speed -= 5;
-  }
-}
+//   break() {
+//     this.speed -= 5;
+//   }
+// }
 
-const ford = new CarCl('Ford', 120);
-console.log(ford);
-ford.speedUS = 80;
-console.log(ford.speed);
-ford.break();
-console.log(ford.speed);
-console.log(ford.speedUS);
+// const ford = new CarCl('Ford', 120);
+// console.log(ford);
+// ford.speedUS = 80;
+// console.log(ford.speed);
+// ford.break();
+// console.log(ford.speed);
+// console.log(ford.speedUS);
+
+const Person = function (firstName, birthYear) {
+  this.firstName = firstName;
+  this.birthYear = birthYear;
+};
+
+Person.prototype.calcAge = function () {
+  console.log(2037 - this.birthYear);
+};
+
+const Student = function (firstName, birthYear, course) {
+  Person.call(this, firstName, birthYear);
+  this.course = course;
+};
+
+Student.prototype = Object.create(Person.prototype);
+
+Student.prototype.introduce = function () {
+  console.log(`My name is ${this.firstName} and I study ${this.course}`);
+};
+
+const mike = new Student('Mike', 2020, 'Computer Science');
+// mike.introduce();
+// console.log(mike);
+// mike.calcAge();
+
+// Coding Challenge #3
+
+// My version
+
+// const Car = function (make, speed) {
+//   this.speed = speed;
+//   this.make = make;
+// };
+
+// Car.prototype.accelerate = function () {
+//   this.speed += 10;
+//   return `${this.make} is now going with ${this.speed}`;
+// };
+// Car.prototype.break = function () {
+//   this.speed -= 5;
+//   return `${this.make} is now going with ${this.speed}`;
+// };
+
+// const EV = function (make, speed, charge) {
+//   Car.call(this, make, speed);
+//   this.charge = charge;
+// };
+
+// EV.prototype = Object.create(Car.prototype);
+// EV.prototype.constructor = EV;
+// EV.prototype.chargeBattery = function (chargeTo) {
+//   this.charge = chargeTo;
+// };
+
+// EV.prototype.accelerate = function () {
+//   this.speed += 20;
+//   this.charge--;
+//   console.log(
+//     `${this.make} going at ${this.speed}km/h, with charge of ${this.charge}%`
+//   );
+// };
+
+// const tesla = new EV('Tesla', 120, 23);
+
+// console.log(tesla);
+
+// tesla.accelerate();
+// console.log(tesla);
+// tesla.break();
+// console.log(tesla);
+// tesla.chargeBattery(90);
+// console.log(tesla);
+// tesla.accelerate();
+// console.log(tesla);
