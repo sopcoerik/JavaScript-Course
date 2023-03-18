@@ -354,3 +354,169 @@ class StudentCl extends PersonCl {
 const erikNew = new StudentCl('Sopco Erik', 2000, 'Computer Science');
 // console.log(erikNew);
 // erikNew.calcAge();
+
+// const PersonProto = {
+//   calcAge() {
+//     console.log(2037 - this.birthYear);
+//   },
+
+//   init(firstName, birthYear) {
+//     this.firstName = firstName;
+//     this.birthYear = birthYear;
+//   },
+// };
+
+// const steven = Object.create(PersonProto);
+
+// steven.init('Steven', 1998);
+// console.log(steven);
+// steven.calcAge();
+
+// const StudentProto = Object.create(PersonProto);
+
+// StudentProto.init = function (firstName, birthYear, course) {
+//   PersonProto.init.call(this, firstName, birthYear);
+//   this.course = course;
+// };
+
+// StudentProto.introduce = function () {
+//   console.log('👋');
+// };
+
+// const jake = Object.create(StudentProto);
+// console.log(jake);
+
+// jake.init('Jake', 1995, 'Computer Science');
+// console.log(jake);
+// jake.introduce();
+
+// Public fields
+// Private fields
+// Public methods
+// Private methods
+// class Account {
+//   //Public fields (on the instances)
+//   locale = navigator.language;
+
+//   //Private Fields
+//   #movements = [];
+//   #pin;
+
+//   constructor(owner, currency, pin) {
+//     this.owner = owner;
+//     this.currency = currency;
+//     this.#pin = pin;
+
+//     // //protected property
+//     // this._movements = [];
+//     // this.locale = navigator.language;
+
+//     console.log(`Thanks for opening an account!`);
+//   }
+
+//   //Public Methods
+//   //Public Interface
+//   getMovements() {
+//     return this.#movements;
+//   }
+
+//   deposit(val) {
+//     this.#movements.push(val);
+//     return this;
+//   }
+
+//   withdraw(val) {
+//     this.deposit(-val);
+//     return this;
+//   }
+
+//   // _approveLoan(val) {
+//   //   return true;
+//   // }
+
+//   requestLoan(val) {
+//     if (this.#approveLoan(val)) {
+//       this.deposit(val);
+//       console.log(`Loan approved`);
+//     }
+//     return this;
+//   }
+
+//   // Private methods
+//   #approveLoan(val) {
+//     return true;
+//   }
+// }
+
+// const acc1 = new Account('Jonas', 'EUR', 1111);
+
+// acc1.deposit(250);
+// acc1.withdraw(140);
+// acc1.requestLoan(1000);
+// console.log(acc1.getMovements());
+
+// console.log(acc1);
+
+// // acc1.movements.push(250);
+// // acc1.movements.push(-140);
+
+// acc1.deposit(300).deposit(500).withdraw(35).requestLoan(25000).withdraw(4000);
+// console.log(acc1);
+
+// Coding Challenge #4
+
+// My version
+
+// class CarCl {
+//   constructor(make, speed) {
+//     this.make = make;
+//     this.speed = speed;
+//   }
+
+//   get speedUS() {
+//     return `Speed in mi/h: ${this.speed / 1.6}`;
+//   }
+
+//   set speedUS(speed) {
+//     this.speed = speed * 1.6;
+//     return this;
+//   }
+
+//   accelerate() {
+//     this.speed += 10;
+//     return this;
+//   }
+
+//   break() {
+//     this.speed -= 5;
+//     return this;
+//   }
+// }
+
+// class EVCl extends CarCl {
+//   #charge;
+//   constructor(make, speed, charge) {
+//     super(make, speed);
+//     this.#charge = charge;
+//   }
+
+//   chargeBattery(chargeTo) {
+//     this.#charge = chargeTo;
+//     return this;
+//   }
+
+//   accelerate() {
+//     this.speed += 20;
+//     this.#charge--;
+//     console.log(
+//       `Now the car goes with ${this.speed}km/h and has ${this.#charge}% charge`
+//     );
+//     return this;
+//   }
+// }
+
+// const rivian = new EVCl('Rivian', 120, 23);
+// console.log(rivian);
+
+// rivian.accelerate().break().chargeBattery(90).accelerate();
+// console.log(rivian);
