@@ -19,7 +19,7 @@ const body = document.querySelector('body');
 
 // Secret Number Generator
 const generateRandomSecretNumber = () => Math.trunc(Math.random() * 20) + 1;
-const secretNumber = generateRandomSecretNumber();
+let secretNumber = generateRandomSecretNumber();
 
 // Message change
 const changeMessage = messageToShow => (message.textContent = messageToShow);
@@ -75,7 +75,7 @@ const checkGuess = () => {
     changeMessage('You Lost! 👎');
     scoreDOM.textContent = 0;
     score = 0;
-    if (score == 0) game = false;
+    game = false;
   }
 };
 
@@ -93,7 +93,7 @@ const reset = () => {
 };
 
 const runGame = () => {
-  if (game == true) {
+  if (game) {
     checkButton.addEventListener('click', checkGuess);
 
     tryAgainButton.addEventListener('click', reset);
