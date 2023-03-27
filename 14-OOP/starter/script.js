@@ -520,3 +520,39 @@ const erikNew = new StudentCl('Sopco Erik', 2000, 'Computer Science');
 
 // rivian.accelerate().break().chargeBattery(90).accelerate();
 // console.log(rivian);
+
+//Recap
+
+const ClassConstFunction = function (firstName, lastName, birthYear) {
+  this.firstName = firstName;
+  this.lastName = lastName;
+  this.birthYear = birthYear;
+};
+
+ClassConstFunction.prototype.calcAge = function (birthYear) {
+  return 2023 - this.birthYear;
+};
+
+const erikClConstFunc = new ClassConstFunction('Erik', 'Sopco', 2000);
+
+// console.log(erikClConstFunc.calcAge());
+
+class PersonRecap {
+  constructor(firstName, lastName, birthYear, course) {
+    this.firstName = firstName;
+    this.lastName = lastName;
+    this.birthYear = birthYear;
+    this.course = course;
+  }
+
+  get age() {
+    return 2023 - this.birthYear;
+  }
+}
+class ErikClES6 extends PersonRecap {
+  constructor(firstName, lastName, birthYear, course) {
+    super(firstName, lastName, birthYear, course);
+  }
+}
+
+console.log(ErikClES6);
