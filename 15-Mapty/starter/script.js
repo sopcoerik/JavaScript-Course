@@ -311,8 +311,8 @@ class App {
   //   });
   // }
 
-  _newWorkout(e) {
-    e.preventDefault();
+  _newWorkout(event) {
+    event.preventDefault();
     const { lat, lng } = this.#event.latlng;
     const coords = [lat, lng];
     const type = inputType.value;
