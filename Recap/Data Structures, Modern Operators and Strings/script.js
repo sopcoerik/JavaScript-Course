@@ -478,3 +478,163 @@ console.log(
 for (const [key, value] of gameEvents.entries()) {
   console.log(`${key <= 45 ? '[FIRST HALF]' : '[SECOND HALF]'}: ${value}`);
 }
+
+// Strings
+const airline = 'TAP Air Portugal';
+const plane = 'A320';
+
+console.log(airline.length);
+console.log(airline.indexOf('r'));
+console.log(airline.lastIndexOf('r'));
+console.log(airline.indexOf('portugal'));
+
+console.log(airline.slice(4, 7));
+
+console.log(airline.slice(0, airline.indexOf(' ')));
+console.log(airline.slice(airline.lastIndexOf(' ') + 1));
+console.log(airline.slice(-2));
+console.log(airline.slice(1, -1));
+
+const checkMiddleSeat = seat => {
+  if (seat.slice(-1) === 'E' || seat.slice(-1) === 'B')
+    console.log('You got the middle seat');
+  else console.log('You got lucky');
+};
+
+checkMiddleSeat('11C');
+
+console.log(airline.toLowerCase());
+console.log(airline.toUpperCase());
+
+const passenger = 'jOnAS';
+const passengerLower = passenger.toLowerCase();
+const passengerCorrect =
+  passengerLower[0].toUpperCase() + passengerLower.slice(1);
+console.log(passengerCorrect);
+
+const toUpperName = personName => {
+  const nameLower = personName.toLowerCase();
+  const nameCorrect = nameLower[0].toUpperCase() + nameLower.slice(1);
+
+  return nameCorrect;
+};
+
+// comparing emails
+
+const email = 'hello@jonas.io';
+const loginEmail = ' Hello@Jonas.io \n';
+
+const lowerEmail = loginEmail.toLowerCase();
+const trimmedEmail = lowerEmail.trim();
+console.log(trimmedEmail);
+
+const normalizedEmail = loginEmail.toLowerCase().trim();
+console.log(normalizedEmail);
+console.log(email === normalizedEmail);
+
+// replacing
+
+const priceGB = '288,97💷';
+const priceUS = priceGB.replace('💷', '💵').replace(',', '.');
+console.log(priceUS);
+
+const announcement =
+  'All passengers come to boarding door 23. Boarding door 23!';
+// console.log(announcement.replaceAll('door', 'gate'));
+
+console.log(announcement.replace(/door/g, 'gate'));
+
+// Booleans
+
+const plane2 = 'A320 Neo';
+console.log(plane2.includes('A320'));
+console.log(plane2.includes('Boeing'));
+console.log(plane2.startsWith('A'));
+
+if (plane2.startsWith('A') && plane2.endsWith('Neo')) {
+  console.log('Part of the NEW product family');
+}
+
+// Practice exercise
+const checkBaggage = item => {
+  const baggage = item.toLowerCase();
+  if (baggage.includes('knife') || baggage.includes('gun'))
+    console.log('You are NOT allowed on board');
+  else console.log('Welcome aboard!');
+};
+checkBaggage('I have a laptop, some food and a pocket knife');
+checkBaggage('Socks and camera');
+checkBaggage('Got some snacks and a gun for protection');
+
+console.log('a+very+nice+string'.split('+'));
+console.log('Jonas Schmedtmann'.split(' '));
+
+const [firstName, lastName] = 'Jonas Schmedtmann'.split(' ');
+console.log(firstName, lastName);
+
+const fullName = ['Mr.', firstName, lastName.toUpperCase()].join(' ');
+console.log(fullName);
+const capitalizeName = persName => {
+  const namesUpper = [];
+  const names = persName.split(' ');
+  for (const word of names) {
+    namesUpper.push(word[0].toUpperCase() + word.slice(1));
+  }
+  console.log(namesUpper.join(' '));
+};
+
+capitalizeName('jessica ann smith davis');
+capitalizeName('jonas schmedtmann');
+
+//padding
+const message = 'Go to gate 23!';
+console.log(message.padStart(25, '+'));
+console.log('erik'.padEnd(25, '+'));
+
+const maskCreditCard = number => {
+  const str = number + '';
+  const last = str.slice(-4);
+  return last.padStart(str.length, '*');
+};
+
+console.log(maskCreditCard(235402983402934823));
+console.log(maskCreditCard('289037420938423904'));
+
+//repeat
+const message2 = 'Bad weather... All departures delayed... ';
+console.log(message2.repeat(5));
+
+const planesInLine = n => {
+  console.log(`There are ${n} planes in line ${'✈️'.repeat(n)}`);
+};
+
+planesInLine(5);
+planesInLine(21);
+planesInLine(15);
+
+// Coding Challenge #4
+
+document.body.append(document.createElement('textarea'));
+document.body.append(document.createElement('button'));
+
+const textarea = document.querySelector('textarea');
+const button = document.querySelector('button');
+
+let arr5;
+const newWordArr = [];
+button.addEventListener('click', function () {
+  arr5 = textarea.value.split('\n');
+  console.log(arr5);
+  arr5.forEach(word => {
+    let temp = word.toLowerCase().trim().split('_');
+    for (let i = 1; i < temp.length; i++) {
+      temp[i] = temp[i][0].toUpperCase() + temp[i].slice(1);
+    }
+    newWordArr.push(temp.join(''));
+    console.log(temp);
+  });
+
+  for (const [index, key] of newWordArr.entries()) {
+    console.log(`${key.padEnd(20)} ${'✅'.repeat(index + 1)}`);
+  }
+});
