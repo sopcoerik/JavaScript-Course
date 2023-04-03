@@ -97,6 +97,26 @@ const createUsernames = accs => {
 createUsernames(accounts);
 console.log(accounts);
 
+const calcDisplaySummary = movs => {
+  const incomes = movements
+    .filter(mov => mov > 0)
+    .reduce((acc, cur) => acc + cur, 0);
+  labelSumIn.textContent = `${incomes}EUR`;
+
+  const outgoing = movements
+    .filter(mov => mov < 0)
+    .reduce((acc, mov) => acc + mov, 0);
+  labelSumOut.textContent = `${Math.abs(outgoing)}EUR`;
+
+  const interest = movements
+    .filter(mov => mov > 0)
+    .map(deposit => (deposit * 1.2) / 100)
+    .filter(int => int >= 1)
+    .reduce((acc, int) => acc + int, 0);
+  labelSumInterest.textContent = `${interest}EUR`;
+};
+calcDisplaySummary(account1.movements);
+
 const calcDisplayBalance = mov => {
   const balance = movements.reduce((acc, mov) => acc + mov, 0);
   labelBalance.textContent = `${balance}EUR`;
@@ -255,14 +275,17 @@ calcDisplayBalance(account1.movements);
 
 // Coding Challenge #2
 
-const calcAvgHumanAge = ages => {
-  const humanAges = ages
-    .map(dogAge => (dogAge <= 2 ? 2 * dogAge : 16 + dogAge * 4))
-    .filter(dogAge => dogAge >= 18);
-  const avgHumanAge =
-    humanAges.reduce((acc, cur) => acc + cur, 0) / humanAges.length;
-  console.log(avgHumanAge);
-};
+// const calcAvgHumanAge = ages => {
+//   const humanAges = ages
+//     .map(dogAge => (dogAge <= 2 ? 2 * dogAge : 16 + dogAge * 4))
+//     .filter(dogAge => dogAge >= 18);
+//   const avgHumanAge =
+//     humanAges.reduce((acc, cur) => acc + cur, 0) / humanAges.length;
+//   console.log(avgHumanAge);
+// };
 
-calcAvgHumanAge([5, 2, 4, 1, 15, 8, 3]);
-calcAvgHumanAge([16, 6, 10, 5, 6, 1, 4]);
+// calcAvgHumanAge([5, 2, 4, 1, 15, 8, 3]);
+// calcAvgHumanAge([16, 6, 10, 5, 6, 1, 4]);
+
+// Coding Challenge #3
+// already written in arr func format
