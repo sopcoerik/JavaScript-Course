@@ -32,9 +32,6 @@ const countriesContainer = document.querySelector('.countries');
 //   });
 // };
 
-getCountryData('romania');
-getCountryData('usa');
-
 const getCountryAndNeighbour = function (country) {
   const request = new XMLHttpRequest();
   request.open('GET', `https://restcountries.com/v2/name/${country}`);
@@ -62,3 +59,4 @@ const getCountryAndNeighbour = function (country) {
     countriesContainer.style.opacity = 1;
   });
 };
+getCountryAndNeighbour('romania');
