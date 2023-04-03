@@ -61,6 +61,8 @@ const inputLoanAmount = document.querySelector('.form__input--loan-amount');
 const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
 
+const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
+
 const displayMovements = movements => {
   containerMovements.innerHTML = '';
 
@@ -80,6 +82,26 @@ const displayMovements = movements => {
 
 displayMovements(account1.movements);
 
+const createUsernames = accs => {
+  accs.forEach(acc => {
+    acc.username = acc.owner
+      .toLowerCase()
+      .split(' ')
+      .map(name => name.at(0))
+      .join('');
+  });
+};
+
+// const user = 'Sopco Erik'; // se
+
+createUsernames(accounts);
+console.log(accounts);
+
+const calcDisplayBalance = mov => {
+  const balance = movements.reduce((acc, mov) => acc + mov, 0);
+  labelBalance.textContent = `${balance}EUR`;
+};
+calcDisplayBalance(account1.movements);
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
 // LECTURES
@@ -94,115 +116,153 @@ displayMovements(account1.movements);
 
 /////////////////////////////////////////////////
 
-let arr = ['a', 'b', 'c', 'd', 'e'];
+// let arr = ['a', 'b', 'c', 'd', 'e'];
 
-//SLICE
-console.log(arr.slice(2));
-console.log(arr.slice(2, 4));
-console.log(arr.slice(-2));
-console.log(arr.slice(-1));
-console.log(arr.slice(1, -2));
-console.log(arr.slice());
-console.log([...arr]);
+// //SLICE
+// console.log(arr.slice(2));
+// console.log(arr.slice(2, 4));
+// console.log(arr.slice(-2));
+// console.log(arr.slice(-1));
+// console.log(arr.slice(1, -2));
+// console.log(arr.slice());
+// console.log([...arr]);
 
-//SPLICE
-// console.log(arr.splice(2));
-arr.splice(-1);
-console.log(arr);
-arr.splice(1, 2);
+// //SPLICE
+// // console.log(arr.splice(2));
+// arr.splice(-1);
+// console.log(arr);
+// arr.splice(1, 2);
 
-console.log(arr);
-// mutates original array
+// console.log(arr);
+// // mutates original array
 
-//REVERSE
-arr = ['a', 'b', 'c', 'd', 'e'];
-const arr2 = ['j', 'i', 'h', 'g', 'f'];
-console.log(arr2.reverse());
-console.log(arr2);
-//mutates original array
+// //REVERSE
+// arr = ['a', 'b', 'c', 'd', 'e'];
+// const arr2 = ['j', 'i', 'h', 'g', 'f'];
+// console.log(arr2.reverse());
+// console.log(arr2);
+// //mutates original array
 
-//CONCAT
+// //CONCAT
 
-const letters = arr.concat(arr2);
-console.log(letters);
-console.log([...arr, ...arr2]);
+// const letters = arr.concat(arr2);
+// console.log(letters);
+// console.log([...arr, ...arr2]);
 
-//JOIN
+// //JOIN
 
-console.log(letters.join(' - '));
+// console.log(letters.join(' - '));
 
-// at method
+// // at method
 
-const arr3 = [23, 11, 64];
-console.log(arr3[0]);
-console.log(arr3.at(0));
+// const arr3 = [23, 11, 64];
+// console.log(arr3[0]);
+// console.log(arr3.at(0));
 
-// getting last el
-console.log(arr3[arr3.length - 1]);
-console.log(arr3.slice(-1)[0]);
-console.log(arr3.at(-1));
+// // getting last el
+// console.log(arr3[arr3.length - 1]);
+// console.log(arr3.slice(-1)[0]);
+// console.log(arr3.at(-1));
 
-console.log('jonas'.at(-1));
+// console.log('jonas'.at(-1));
 
-//forEach
-const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
+// //forEach
+// // const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
 
-// for (const movement of movements) {
-for (const [i, movement] of movements.entries()) {
-  if (movement > 0) {
-    console.log(`Movement${i + 1}: You deposited ${movement}`);
-  } else {
-    console.log(`Movement${i + 1}: You withdrew ${Math.abs(movement)}`);
-  }
-}
+// // for (const movement of movements) {
+// for (const [i, movement] of movements.entries()) {
+//   if (movement > 0) {
+//     console.log(`Movement${i + 1}: You deposited ${movement}`);
+//   } else {
+//     console.log(`Movement${i + 1}: You withdrew ${Math.abs(movement)}`);
+//   }
+// }
 
-console.log(`-----------------FOREACH-----------------`);
+// console.log(`-----------------FOREACH-----------------`);
 
-movements.forEach((mov, i, arr) => {
-  if (mov > 0) {
-    console.log(`Movement${i + 1}: You deposited ${mov}`);
-  } else {
-    console.log(`Movement${i + 1}: You withdrew ${Math.abs(mov)}`);
-  }
-});
+// movements.forEach((mov, i, arr) => {
+//   if (mov > 0) {
+//     console.log(`Movement${i + 1}: You deposited ${mov}`);
+//   } else {
+//     console.log(`Movement${i + 1}: You withdrew ${Math.abs(mov)}`);
+//   }
+// });
 
-// with maps and sets
+// // with maps and sets
 
-//map
-const currencies = new Map([
-  ['USD', 'United States dollar'],
-  ['EUR', 'Euro'],
-  ['GBP', 'Pound sterling'],
-]);
+// //map
+// const currencies = new Map([
+//   ['USD', 'United States dollar'],
+//   ['EUR', 'Euro'],
+//   ['GBP', 'Pound sterling'],
+// ]);
 
-currencies.forEach((value, key, map) => {
-  console.log(`${key}: ${value}`);
-});
+// currencies.forEach((value, key, map) => {
+//   console.log(`${key}: ${value}`);
+// });
 
-// set
-const currenciesUnique = new Set(['USD', 'GBP', 'USD', 'EUR', 'EUR']);
-console.log(currenciesUnique);
-currenciesUnique.forEach((value, _, map) => {
-  console.log(`${value}: ${value}`);
-});
+// // set
+// const currenciesUnique = new Set(['USD', 'GBP', 'USD', 'EUR', 'EUR']);
+// console.log(currenciesUnique);
+// currenciesUnique.forEach((value, _, map) => {
+//   console.log(`${value}: ${value}`);
+// });
 
-// sets have no indexes
+// // sets have no indexes
 
-// Coding Challenge #1
+// // Coding Challenge #1
 
-const checkDogs = (dogsJulia, dogsKate) => {
-  const shallowCopyDogsJulia = dogsJulia.slice().splice(1);
-  shallowCopyDogsJulia.splice(-2);
-  const dogsArrAll = shallowCopyDogsJulia.concat(dogsKate);
-  dogsArrAll.forEach((dogAge, i) =>
-    dogAge < 3
-      ? console.log(`Dog number ${i + 1} is still a puppy`)
-      : console.log(
-          `Dog number ${i + 1} is an adult and is ${dogAge} years old`
-        )
-  );
+// // const checkDogs = (dogsJulia, dogsKate) => {
+// //   const shallowCopyDogsJulia = dogsJulia.slice().splice(1);
+// //   shallowCopyDogsJulia.splice(-2);
+// //   const dogsArrAll = shallowCopyDogsJulia.concat(dogsKate);
+// //   dogsArrAll.forEach((dogAge, i) =>
+// //     dogAge < 3
+// //       ? console.log(`Dog number ${i + 1} is still a puppy`)
+// //       : console.log(
+// //           `Dog number ${i + 1} is an adult and is ${dogAge} years old`
+// //         )
+// //   );
+// // };
+
+// // checkDogs([3, 5, 2, 12, 7], [4, 1, 15, 8, 3]);
+// // console.log(`---------------------------`);
+// // checkDogs([9, 16, 6, 8, 3], [10, 5, 6, 1, 4]);
+
+// const eurToUsd = 1.1;
+
+// const movementsUSD = movements.map(mov => mov * eurToUsd);
+
+// console.log(movements);
+// console.log(movementsUSD);
+
+// const deposits = movements.filter(mov => mov > 0);
+// console.log(deposits);
+
+// const withdrawals = movements.filter(mov => mov < 0);
+// console.log(withdrawals);
+
+// const balance = movements.reduce((accumulator, mov) => accumulator + mov, 0);
+// console.log(balance);
+
+// // maximum value
+// const max = movements.reduce(
+//   (acc, mov) => (acc > mov ? acc : mov),
+//   movements[0]
+// );
+
+// console.log(max);
+
+// Coding Challenge #2
+
+const calcAvgHumanAge = ages => {
+  const humanAges = ages
+    .map(dogAge => (dogAge <= 2 ? 2 * dogAge : 16 + dogAge * 4))
+    .filter(dogAge => dogAge >= 18);
+  const avgHumanAge =
+    humanAges.reduce((acc, cur) => acc + cur, 0) / humanAges.length;
+  console.log(avgHumanAge);
 };
 
-checkDogs([3, 5, 2, 12, 7], [4, 1, 15, 8, 3]);
-console.log(`---------------------------`);
-checkDogs([9, 16, 6, 8, 3], [10, 5, 6, 1, 4]);
+calcAvgHumanAge([5, 2, 4, 1, 15, 8, 3]);
+calcAvgHumanAge([16, 6, 10, 5, 6, 1, 4]);
