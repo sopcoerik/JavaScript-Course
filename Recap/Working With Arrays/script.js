@@ -289,3 +289,45 @@ calcDisplayBalance(account1.movements);
 
 // Coding Challenge #3
 // already written in arr func format
+
+//Coding Challenge #4
+const dogs = [
+  { weight: 22, curFood: 250, owners: ['Alice', 'Bob'] },
+  { weight: 8, curFood: 200, owners: ['Matilda'] },
+  { weight: 13, curFood: 275, owners: ['Sarah', 'John'] },
+  { weight: 32, curFood: 340, owners: ['Michael'] },
+];
+
+dogs.map(dog => (dog.recFood = Math.floor(dog.weight ** 0.75 * 28)));
+const dogSarah = dogs.find(dog => dog.owners.includes('Sarah'));
+const isSarahsDogEatingTooMuch =
+  dogSarah.curFood > dogSarah.recFood ? 'Too Much' : `Too Little`;
+console.log(isSarahsDogEatingTooMuch);
+
+const ownersEatTooMuch = dogs
+  .flatMap(dog => dog.curFood > dog.recFood && dog.owners)
+  .filter(owner => owner);
+
+const ownersEatTooLittle = dogs
+  .flatMap(dog => dog.curFood < dog.recFood && dog.owners)
+  .filter(owner => owner);
+
+console.log(`${ownersEatTooMuch.join(' and ')}'s dogs eat too much`);
+console.log(`${ownersEatTooLittle.join(' and ')}'s dogs eat too little`);
+
+console.log(dogs.some(dog => dog.curFood === dog.recFood));
+console.log(
+  dogs.some(
+    dog => dog.curFood > dog.recFood * 0.9 && dog.curFood < dog.recFood * 1.1
+  )
+);
+
+const dogsEatOkay = dogs.filter(
+  dog => dog.curFood > dog.recFood * 0.9 && dog.curFood < dog.recFood * 1.1
+);
+console.log(dogsEatOkay);
+
+const shallowCopyDogs = dogs
+  .map(dog => dog)
+  .sort((a, b) => a.recFood - b.recFood);
+console.log(shallowCopyDogs);

@@ -60,3 +60,31 @@ const getCountryAndNeighbour = function (country) {
   });
 };
 getCountryAndNeighbour('romania');
+
+const whereAmI = (lat, lng) => {
+  fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en
+`)
+    .then(res => {
+      return res.json();
+    })
+    .then(data => {
+      console.log(data);
+      console.log(`You are in ${data.city}, ${data.countryName}`);
+    });
+};
+
+whereAmI(52.508, 13.381);
+whereAmI(19.037, 72.873);
+whereAmI(-33.933, 18.475);
+
+const lotteryPromis = new Promise((resolve, reject) => {
+  setTimeout(() => {
+    if (Math.random() >= 0.5) {
+      resolve('you WIN!');
+    } else {
+      reject(new Error('you LOST'));
+    }
+  }, 2000);
+});
+
+lotteryPromis.then(res => console.log(res)).catch(err => console.log(err));
