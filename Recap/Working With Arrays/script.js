@@ -63,6 +63,7 @@ const inputClosePin = document.querySelector('.form__input--pin');
 
 const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
 
+let sorted = false;
 // Created username for each acc
 const usernameCreation = () => {
   accounts.forEach(
@@ -98,16 +99,21 @@ btnLogin.addEventListener('click', e => {
   displaySummary(currentUser);
 });
 
-const displayMovements = acc => {
+const displayMovements = (acc, sorted) => {
   containerMovements.textContent = '';
-  acc.movements.forEach((mov, i) => {
+
+  const movs = sorted
+    ? acc.movements.slice().sort((a, b) => a - b)
+    : acc.movements;
+
+  movs.forEach((mov, i) => {
     const html = `<div class="movements__row">
-        <div class="movements__type movements__type--${
-          mov > 0 ? 'deposit' : 'withdrawal'
-        }">${i + 1} ${mov > 0 ? 'deposit' : 'withdrawal'}</div>
-        <div class="movements__date"></div>
-        <div class="movements__value">${mov}EUR</div>
-      </div>`;
+    <div class="movements__type movements__type--${
+      mov > 0 ? 'deposit' : 'withdrawal'
+    }">${i + 1} ${mov > 0 ? 'deposit' : 'withdrawal'}</div>
+    <div class="movements__date"></div>
+    <div class="movements__value">${mov}EUR</div>
+    </div>`;
     containerMovements.insertAdjacentHTML('afterbegin', html);
   });
 };
@@ -121,12 +127,12 @@ const displaySummary = function (acc) {
   const incomes = acc.movements
     .filter(mov => mov > 0)
     .reduce((acc, mov) => acc + mov, 0);
-  labelSumIn.textContent = `${incomes}€`;
+  labelSumIn.textContent = `${incomes}EUR`;
 
   const out = acc.movements
     .filter(mov => mov < 0)
     .reduce((acc, mov) => acc + mov, 0);
-  labelSumOut.textContent = `${Math.abs(out)}€`;
+  labelSumOut.textContent = `${Math.abs(out)}EUR`;
 
   const interest = acc.movements
     .map(mov => (mov * acc.interestRate) / 100)
@@ -134,7 +140,7 @@ const displaySummary = function (acc) {
       return mov >= 1;
     })
     .reduce((acc, curr) => acc + curr, 0);
-  labelSumInterest.textContent = `${interest}€`;
+  labelSumInterest.textContent = `${interest}EUR`;
 };
 
 btnTransfer.addEventListener('click', e => {
@@ -187,6 +193,12 @@ btnClose.addEventListener('click', e => {
     accounts.splice(accIndex, 1);
     containerApp.style.opacity = 0;
   }
+});
+
+btnSort.addEventListener('click', e => {
+  e.preventDefault();
+  displayMovements(currentUser, !sorted);
+  sorted = !sorted;
 });
 
 /////////////////////////////////////////////////
