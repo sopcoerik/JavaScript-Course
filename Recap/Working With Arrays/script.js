@@ -78,6 +78,29 @@ const usernameCreation = () => {
 usernameCreation();
 
 let currentUser;
+const now = new Date(); // so first I need a new date in a variable
+labelDate.textContent = Intl.DateTimeFormat(navigator.language).format(now); // then I can format that new date with the intl api based on the browsers language
+
+const startTimer = () => {
+  let time = 120;
+
+  const tick = () => {
+    const min = String(Math.trunc(time / 60)).padStart(2, 0);
+    const sec = String(Math.trunc(time % 60)).padStart(2, 0);
+
+    labelTimer.textContent = `${min}:${sec}`;
+
+    if (time === 0) {
+      clearInterval(timer);
+      containerApp.style.opacity = 0;
+    }
+
+    time--;
+  };
+
+  tick();
+  const timer = setInterval(tick, 1000);
+};
 
 btnLogin.addEventListener('click', e => {
   e.preventDefault();
@@ -91,6 +114,7 @@ btnLogin.addEventListener('click', e => {
       currentUser = acc;
     }
   });
+  startTimer();
   inputLoginUsername.value = inputLoginPin.value = '';
   labelWelcome.textContent = `Welcome back, ${currentUser.owner}`;
   console.log(currentUser);
@@ -112,7 +136,10 @@ const displayMovements = (acc, sorted) => {
       mov > 0 ? 'deposit' : 'withdrawal'
     }">${i + 1} ${mov > 0 ? 'deposit' : 'withdrawal'}</div>
     <div class="movements__date"></div>
-    <div class="movements__value">${mov}EUR</div>
+    <div class="movements__value">${Intl.NumberFormat(navigator.language, {
+      style: 'currency',
+      currency: `${navigator.language == 'en-US' ? 'USD' : 'EUR'}`,
+    }).format(mov)}</div>
     </div>`;
     containerMovements.insertAdjacentHTML('afterbegin', html);
   });
@@ -120,19 +147,28 @@ const displayMovements = (acc, sorted) => {
 
 const displayBalance = acc => {
   acc.balance = acc.movements.reduce((sum, curr) => sum + curr, 0);
-  labelBalance.textContent = `${acc.balance}EUR`;
+  labelBalance.textContent = Intl.NumberFormat(navigator.language, {
+    style: 'currency',
+    currency: `${navigator.language == 'en-US' ? 'USD' : 'EUR'}`,
+  }).format(acc.balance);
 };
 
 const displaySummary = function (acc) {
   const incomes = acc.movements
     .filter(mov => mov > 0)
     .reduce((acc, mov) => acc + mov, 0);
-  labelSumIn.textContent = `${incomes}EUR`;
+  labelSumIn.textContent = Intl.NumberFormat(navigator.language, {
+    style: 'currency',
+    currency: `${navigator.language == 'en-US' ? 'USD' : 'EUR'}`,
+  }).format(incomes);
 
   const out = acc.movements
     .filter(mov => mov < 0)
     .reduce((acc, mov) => acc + mov, 0);
-  labelSumOut.textContent = `${Math.abs(out)}EUR`;
+  labelSumOut.textContent = Intl.NumberFormat(navigator.language, {
+    style: 'currency',
+    currency: `${navigator.language == 'en-US' ? 'USD' : 'EUR'}`,
+  }).format(Math.abs(out));
 
   const interest = acc.movements
     .map(mov => (mov * acc.interestRate) / 100)
@@ -140,7 +176,10 @@ const displaySummary = function (acc) {
       return mov >= 1;
     })
     .reduce((acc, curr) => acc + curr, 0);
-  labelSumInterest.textContent = `${interest}EUR`;
+  labelSumInterest.textContent = Intl.NumberFormat(navigator.language, {
+    style: 'currency',
+    currency: `${navigator.language == 'en-US' ? 'USD' : 'EUR'}`,
+  }).format(interest);
 };
 
 btnTransfer.addEventListener('click', e => {
