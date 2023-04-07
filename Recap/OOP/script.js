@@ -106,3 +106,50 @@
 // tesla.accelerate();
 // tesla.brake();
 // tesla.chargeBattery(90);
+
+// Coding Challenge #4
+
+class CarCl {
+  constructor(make, speed) {
+    this.make = make;
+    this.speed = speed;
+  }
+
+  accelerate() {
+    this.speed += 10;
+    console.log('accelerate: ', this.speed);
+    return this;
+  }
+
+  brake() {
+    this.speed -= 5;
+    console.log('brake :', this.speed);
+    return this;
+  }
+
+  get speedUS() {
+    console.log('speedUS: ', Number((this.speed / 1.6).toFixed(2)));
+  }
+
+  set speedUS(speedUSInput) {
+    this.speed = speedUSInput * 1.6;
+    console.log(this.speed);
+  }
+}
+
+class EVCl extends CarCl {
+  #charge;
+
+  constructor(make, speed, charge) {
+    super(make, speed);
+    this.#charge = charge;
+  }
+
+  chargeBattery(chargeValue) {
+    this.#charge = chargeValue;
+    return this;
+  }
+}
+
+const rivian = new EVCl('Rivian', 120, 23);
+rivian.accelerate().chargeBattery(90).brake().accelerate().accelerate();
