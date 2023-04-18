@@ -5,7 +5,7 @@ class SearchView {
     const html = `
     <li class="preview">
     <a
-      class="preview__link preview__link--active"
+      class="preview__link"
       href="#${recipe.id}"
     >
       <figure class="preview__fig">
@@ -18,7 +18,6 @@ class SearchView {
     </a>
   </li>`;
 
-    this.#parentElement.innerHTML = '';
     this.#parentElement.insertAdjacentHTML('afterbegin', html);
   }
 }
