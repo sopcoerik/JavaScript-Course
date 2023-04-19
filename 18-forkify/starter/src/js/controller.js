@@ -94,10 +94,10 @@ const renderRecipe = async function (recipe, state) {
 
   document
     .querySelector('.btn--increase-servings')
-    .addEventListener('click', View.increaseServings);
+    .addEventListener('click', () => View.increaseServings(recipe));
   document
     .querySelector('.btn--decrease-servings')
-    .addEventListener('click', View.decreaseServings);
+    .addEventListener('click', () => View.decreaseServings(recipe));
 };
 
 const delMessage = () => {

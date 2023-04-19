@@ -72,10 +72,9 @@ class View {
                 <div class="recipe__quantity">${
                   ing.quantity ? fracty(ing.quantity) : ''
                 }</div>
-                <div class="recipe__description">
                 <span class="recipe__unit">${ing.unit}</span>
-                ${ing.description}
-                </div>
+                <span>&nbsp</span>
+                <div class="recipe__description">${ing.description}</div>
             </li>
             `;
           })
@@ -120,24 +119,34 @@ class View {
     });
   }
 
-  increaseServings() {
-    const ingredientQuantityElements =
-      document.querySelectorAll('.recipe__quantity');
-
+  increaseServings(currentRecipe) {
     const servings = document.querySelector('.recipe__info-data--people');
-
     servings.innerHTML++;
-    ingredientQuantityElements.forEach(el => {
-      const elementNumber = el.innerHTML
-        .split(' ')
-        .map(el => Number(el).toFixed(1));
-      console.log(elementNumber);
-      if (!el.innerHTML) return;
-      const ingredientQuantity = Number(el.innerHTML);
-      const servingsQuantity = Number(servings.innerHTML);
-      let newIngredientQuantity =
-        ingredientQuantity + ingredientQuantity / (servingsQuantity - 1);
-      el.innerHTML = fracty(newIngredientQuantity.toFixed(1));
+    const newServingsQuantity = servings.innerHTML;
+
+    // go over each recipe ingredient ( from js structure )
+    currentRecipe.ingredients.forEach(ingredient => {
+      // calculate the new ingredient quantity based on the new servings, starting from the data you have in the recipe data
+      // get quantity necessary for serving
+      const quantityPerServing = ingredient.quantity / currentRecipe.servings;
+      const newIngredientQuantity = (
+        quantityPerServing * newServingsQuantity
+      ).toFixed(1);
+
+      // find the appropriate html element for current ingredient in the loop
+      // ingredient.description
+      const ingredientElements = document.querySelectorAll(
+        '.recipe__ingredient'
+      );
+      const ingredientElement = Array.from(ingredientElements).find(
+        iE =>
+          iE.querySelector('.recipe__description').innerHTML ===
+          ingredient.description
+      );
+
+      const ingredientQuantityElement =
+        ingredientElement.querySelector('.recipe__quantity');
+      ingredientQuantityElement.innerHTML = fracty(newIngredientQuantity);
     });
   }
 }
