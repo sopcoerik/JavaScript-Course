@@ -18,6 +18,19 @@ class BookmarkView {
 
     recipe.bookmarked = true;
   }
+
+  delRecipeFromBookmarks(recipe) {
+    const allBookmarkedRecipes =
+      this.#parentElement.querySelectorAll('.preview__link');
+    allBookmarkedRecipes.forEach(currRecipe => {
+      console.log(currRecipe);
+      const currRecipeId = currRecipe.getAttribute('href').split('#');
+      console.log(currRecipeId.splice(0, 1));
+      if (currRecipeId[0] === recipe.id) {
+        currRecipe.closest('.preview').remove();
+      }
+    });
+  }
 }
 
 export default new BookmarkView();

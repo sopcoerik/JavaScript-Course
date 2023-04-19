@@ -1,25 +1,45 @@
+import icons from 'url:../img/icons.svg';
+
 class Model {
   getRecipeData = async function () {
-    const id = window.location.hash;
+    let id;
+    if (!window.location.hash) return;
+    else id = window.location.hash;
 
-    const getData = await fetch(
-      `https://forkify-api.herokuapp.com/api/v2/recipes/${id.slice(1)}`
-    );
-    const data = await getData.json();
-    let { recipe } = data.data;
+    try {
+      const getData = await fetch(
+        `https://forkify-api.herokuapp.com/api/v2/recipes/${id.slice(1)}`
+      );
+      const data = await getData.json();
+      let { recipe } = data.data;
 
-    recipe = {
-      cookingTime: recipe.cooking_time,
-      id: recipe.id,
-      imageUrl: recipe.image_url,
-      ingredients: recipe.ingredients,
-      publisher: recipe.publisher,
-      servings: recipe.servings,
-      sourceUrl: recipe.source_url,
-      title: recipe.title,
-    };
+      recipe = {
+        cookingTime: recipe.cooking_time,
+        id: recipe.id,
+        imageUrl: recipe.image_url,
+        ingredients: recipe.ingredients,
+        publisher: recipe.publisher,
+        servings: recipe.servings,
+        sourceUrl: recipe.source_url,
+        title: recipe.title,
+      };
 
-    return recipe;
+      return recipe;
+    } catch (err) {
+      document.querySelector('.recipe').textContent = '';
+      const html = `
+      <div class="error">
+        <div>
+          <svg>
+            <use href="${icons}#icon-alert-triangle"></use>
+          </svg>
+        </div>
+        <p>No recipes found for your query. Please try again!</p>
+      </div>
+      `;
+      document.querySelector('.recipe').insertAdjacentHTML('afterbegin', html);
+      throw new Error(err);
+    }
   };
 
   getRecipesFromSearch = async function () {

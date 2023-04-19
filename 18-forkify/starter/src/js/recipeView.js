@@ -70,7 +70,7 @@ class View {
                 <use href="${icons}#icon-check"></use>
                 </svg>
                 <div class="recipe__quantity">${
-                  ing.quantity ? ing.quantity : ''
+                  ing.quantity ? fracty(ing.quantity) : ''
                 }</div>
                 <div class="recipe__description">
                 <span class="recipe__unit">${ing.unit}</span>
@@ -121,15 +121,23 @@ class View {
   }
 
   increaseServings() {
-    const quantityEls = document.querySelectorAll('.recipe__quantity');
+    const ingredientQuantityElements =
+      document.querySelectorAll('.recipe__quantity');
 
     const servings = document.querySelector('.recipe__info-data--people');
 
     servings.innerHTML++;
-    quantityEls.forEach(el => {
-      el.innerHTML =
-        Number(el.innerHTML) +
-        (Number(el.innerHTML) / Number(servings.innerHTML)).toFixed(1);
+    ingredientQuantityElements.forEach(el => {
+      const elementNumber = el.innerHTML
+        .split(' ')
+        .map(el => Number(el).toFixed(1));
+      console.log(elementNumber);
+      if (!el.innerHTML) return;
+      const ingredientQuantity = Number(el.innerHTML);
+      const servingsQuantity = Number(servings.innerHTML);
+      let newIngredientQuantity =
+        ingredientQuantity + ingredientQuantity / (servingsQuantity - 1);
+      el.innerHTML = fracty(newIngredientQuantity.toFixed(1));
     });
   }
 }

@@ -25,17 +25,28 @@ const timeout = function (s) {
 
 ///////////////////////////////////////
 
-let recipes = [];
+let bookmarkedRecipes = [];
+var recipe;
+window.addEventListener('load', async function () {
+  const recipe = await Model.getRecipeData();
+  // View.renderRecipeView(recipe);
+  renderRecipe(recipe);
+});
+window.addEventListener('hashchange', async function () {
+  const recipe = await Model.getRecipeData();
 
+  // View.renderRecipeView(recipe);
+  renderRecipe(recipe);
+});
 const renderRecipe = async function (recipe, state) {
   if (!recipe) recipe = await Model.getRecipeData();
 
-  recipe.bookmarked = state ? state : false;
+  recipe.bookmarked = recipe.bookmarked ? recipe.bookmarked : false;
   View.renderRecipeView(recipe);
 
   if (
     recipe.bookmarked ||
-    recipes.find(recipeCurr => recipeCurr.id === recipe.id)
+    bookmarkedRecipes.find(recipeCurr => recipeCurr.id === recipe.id)
   ) {
     document
       .querySelector('.btn--round')
@@ -45,14 +56,40 @@ const renderRecipe = async function (recipe, state) {
 
   document.querySelector('.btn--round').addEventListener('click', function (e) {
     e.preventDefault();
-    e.target
-      .querySelector('use')
-      .setAttribute('href', `${icons}#icon-bookmark-fill`);
+    bookmarkedRecipes =
+      JSON.parse(localStorage.getItem('bookmarkedRecipes')) || [];
+    console.log(bookmarkedRecipes);
+    if (recipe.bookmarked) {
+      recipe.bookmarked = false;
+      // console.log(e.target);
+      e.target
+        .closest('.btn--round')
+        .querySelector('use')
+        .setAttribute('href', `${icons}#icon-bookmark`);
+      const indexOfCurrentRecipe = bookmarkedRecipes.findIndex(
+        currRecipe => currRecipe.id === recipe.id
+      );
+      BookmarkView.delRecipeFromBookmarks(recipe);
+      bookmarkedRecipes.splice(indexOfCurrentRecipe, 1);
+      localStorage.setItem(
+        'bookmarkedRecipes',
+        JSON.stringify(bookmarkedRecipes)
+      );
+      return;
+    } else {
+      e.target
+        .closest('.btn--round')
+        .querySelector('use')
+        .setAttribute('href', `${icons}#icon-bookmark-fill`);
 
-    recipes.push(recipe);
-    localStorage.setItem('recipes', JSON.stringify(recipes));
-    BookmarkView.addRecipeToBookmarks(recipe);
-    delMessage();
+      bookmarkedRecipes.push(recipe);
+      localStorage.setItem(
+        'bookmarkedRecipes',
+        JSON.stringify(bookmarkedRecipes)
+      );
+      BookmarkView.addRecipeToBookmarks(recipe);
+      delMessage();
+    }
   });
 
   document
@@ -93,16 +130,29 @@ document.querySelector('.bookmarks').addEventListener('click', function (e) {
   }
 });
 
-const init = () => {
-  recipes = JSON.parse(localStorage.getItem('recipes')) || [];
+document
+  .querySelector('.search')
+  .addEventListener('submit', async function (e) {
+    e.preventDefault();
 
-  console.log(recipes);
-  if (!recipes) return;
-  recipes.forEach(recipe => {
+    document.querySelector('.results').textContent = '';
+
+    const searchedArr = await Model.getRecipesFromSearch();
+
+    searchedArr.forEach(rec => SearchView.renderSearchView(rec));
+  });
+
+const getLocalStorage = () => {
+  bookmarkedRecipes =
+    JSON.parse(localStorage.getItem('bookmarkedRecipes')) || [];
+
+  if (!bookmarkedRecipes) return;
+  bookmarkedRecipes.forEach(recipe => {
     recipe.bookmarked = true;
     BookmarkView.addRecipeToBookmarks(recipe);
     delMessage();
   });
+  console.log(bookmarkedRecipes);
 };
 
-init();
+getLocalStorage();
