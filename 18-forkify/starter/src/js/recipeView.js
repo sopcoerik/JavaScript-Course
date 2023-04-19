@@ -103,19 +103,50 @@ class View {
     </div>
     `;
     this.#parentElement.innerHTML = '';
+    this.#parentElement.insertAdjacentHTML(
+      'afterbegin',
+      `<div class="spinner hidden">
+        <svg>
+          <use href="${icons}#icon-loader"></use>
+        </svg>
+      </div>`
+    );
     this.#parentElement.insertAdjacentHTML('afterbegin', html);
   };
 
-  decreaseServings() {
-    const quantityEls = document.querySelectorAll('.recipe__quantity');
-
+  decreaseServings(currentRecipe) {
     const servings = document.querySelector('.recipe__info-data--people');
+    if (servings.innerHTML <= 1) servings.innerHTML = 1;
+    else servings.innerHTML--;
 
-    servings.innerHTML--;
-    quantityEls.forEach(el => {
-      el.innerHTML =
-        Number(el.innerHTML) +
-        (Number(el.innerHTML) / Number(servings.innerHTML)).toFixed(1);
+    const newServingsQuantity = servings.innerHTML;
+
+    // go over each recipe ingredient ( from js structure )
+    currentRecipe.ingredients.forEach(ingredient => {
+      // calculate the new ingredient quantity based on the new servings, starting from the data you have in the recipe data
+      // get quantity necessary for serving
+      const quantityPerServing = ingredient.quantity / currentRecipe.servings;
+      const newIngredientQuantity = (
+        quantityPerServing * newServingsQuantity
+      ).toFixed(1);
+
+      // find the appropriate html element for current ingredient in the loop
+      // ingredient.description
+      const ingredientElements = document.querySelectorAll(
+        '.recipe__ingredient'
+      );
+      const ingredientElement = Array.from(ingredientElements).find(
+        iE =>
+          iE.querySelector('.recipe__description').innerHTML ===
+          ingredient.description
+      );
+
+      const ingredientQuantityElement =
+        ingredientElement.querySelector('.recipe__quantity');
+
+      if (!ingredientQuantityElement.innerHTML) return;
+
+      ingredientQuantityElement.innerHTML = fracty(newIngredientQuantity);
     });
   }
 
@@ -146,6 +177,9 @@ class View {
 
       const ingredientQuantityElement =
         ingredientElement.querySelector('.recipe__quantity');
+
+      if (!ingredientQuantityElement.innerHTML) return;
+
       ingredientQuantityElement.innerHTML = fracty(newIngredientQuantity);
     });
   }

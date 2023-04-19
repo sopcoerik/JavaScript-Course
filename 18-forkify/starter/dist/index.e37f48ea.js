@@ -573,6 +573,8 @@ var _searchView = require("./searchView");
 var _searchViewDefault = parcelHelpers.interopDefault(_searchView);
 var _bookmarkView = require("./bookmarkView");
 var _bookmarkViewDefault = parcelHelpers.interopDefault(_bookmarkView);
+var _paginationView = require("./paginationView");
+var _paginationViewDefault = parcelHelpers.interopDefault(_paginationView);
 const recipeContainer = document.querySelector(".recipe");
 const recipeSearchResults = document.querySelector(".results");
 const timeout = function(s) {
@@ -587,6 +589,8 @@ const timeout = function(s) {
 ///////////////////////////////////////
 let bookmarkedRecipes = [];
 var recipe;
+(0, _paginationViewDefault.default).addPrevButton();
+(0, _paginationViewDefault.default).addNextButton();
 window.addEventListener("load", async function() {
     const recipe = await (0, _modelDefault.default).getRecipeData();
     // View.renderRecipeView(recipe);
@@ -599,13 +603,18 @@ window.addEventListener("hashchange", async function() {
 });
 const renderRecipe = async function(recipe, state) {
     if (!recipe) recipe = await (0, _modelDefault.default).getRecipeData();
-    recipe.bookmarked = recipe.bookmarked ? recipe.bookmarked : false;
-    (0, _recipeViewDefault.default).renderRecipeView(recipe);
+    const isLoadedRecipeBookmarked = bookmarkedRecipes.find((currentRecipe)=>recipe.id === currentRecipe.id);
+    if (isLoadedRecipeBookmarked) {
+        isLoadedRecipeBookmarked.bookmarked = true;
+        (0, _recipeViewDefault.default).renderRecipeView(isLoadedRecipeBookmarked);
+        recipe = isLoadedRecipeBookmarked;
+    } else {
+        recipe.bookmarked = false;
+        (0, _recipeViewDefault.default).renderRecipeView(recipe);
+    }
     if (recipe.bookmarked || bookmarkedRecipes.find((recipeCurr)=>recipeCurr.id === recipe.id)) document.querySelector(".btn--round").querySelector("use").setAttribute("href", `${(0, _iconsSvgDefault.default)}#icon-bookmark-fill`);
     document.querySelector(".btn--round").addEventListener("click", function(e) {
         e.preventDefault();
-        bookmarkedRecipes = JSON.parse(localStorage.getItem("bookmarkedRecipes")) || [];
-        console.log(bookmarkedRecipes);
         if (recipe.bookmarked) {
             recipe.bookmarked = false;
             // console.log(e.target);
@@ -623,8 +632,8 @@ const renderRecipe = async function(recipe, state) {
             delMessage();
         }
     });
-    document.querySelector(".btn--increase-servings").addEventListener("click", (0, _recipeViewDefault.default).increaseServings);
-    document.querySelector(".btn--decrease-servings").addEventListener("click", (0, _recipeViewDefault.default).decreaseServings);
+    document.querySelector(".btn--increase-servings").addEventListener("click", ()=>(0, _recipeViewDefault.default).increaseServings(recipe));
+    document.querySelector(".btn--decrease-servings").addEventListener("click", ()=>(0, _recipeViewDefault.default).decreaseServings(recipe));
 };
 const delMessage = ()=>{
     document.querySelector(".message").style.display = "none";
@@ -649,9 +658,31 @@ document.querySelector(".bookmarks").addEventListener("click", function(e) {
 });
 document.querySelector(".search").addEventListener("submit", async function(e) {
     e.preventDefault();
-    document.querySelector(".results").textContent = "";
+    if (!document.querySelector(".search__field").value) return;
+    recipeSearchResults.textContent = "";
+    recipeSearchResults.insertAdjacentHTML("afterbegin", `
+      <div class="spinner">
+        <svg>
+          <use href="${(0, _iconsSvgDefault.default)}#icon-loader"></use>
+        </svg>
+      </div>`);
     const searchedArr = await (0, _modelDefault.default).getRecipesFromSearch();
     searchedArr.forEach((rec)=>(0, _searchViewDefault.default).renderSearchView(rec));
+});
+const btnPreviousPage = document.querySelector(".pagination__btn--prev");
+const btnNextPage = document.querySelector(".pagination__btn--next");
+const elementsPerPage = 10;
+btnPreviousPage.addEventListener("click", function(e) {
+    e.preventDefault();
+    let pageNumber = e.target.closest("button").dataset.pageNumber;
+    console.log(`page ${pageNumber}`);
+    e.target.closest("button").dataset.pageNumber--;
+});
+btnNextPage.addEventListener("click", function(e) {
+    e.preventDefault();
+    let pageNumber = e.target.closest("button").dataset.pageNumber;
+    console.log(`page ${pageNumber}`);
+    e.target.closest("button").dataset.pageNumber++;
 });
 const getLocalStorage = ()=>{
     bookmarkedRecipes = JSON.parse(localStorage.getItem("bookmarkedRecipes")) || [];
@@ -661,11 +692,10 @@ const getLocalStorage = ()=>{
         (0, _bookmarkViewDefault.default).addRecipeToBookmarks(recipe);
         delMessage();
     });
-    console.log(bookmarkedRecipes);
 };
 getLocalStorage();
 
-},{"core-js/modules/es.regexp.flags.js":"gSXXb","core-js/modules/web.immediate.js":"49tUX","regenerator-runtime":"dXNgZ","fracty":"hJO4d","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./model":"Y4A21","url:../img/icons.svg":"loVOp","./recipeView":"jSwDy","./searchView":"9M3GU","./bookmarkView":"bfvPN"}],"gSXXb":[function(require,module,exports) {
+},{"core-js/modules/es.regexp.flags.js":"gSXXb","core-js/modules/web.immediate.js":"49tUX","regenerator-runtime":"dXNgZ","fracty":"hJO4d","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./model":"Y4A21","url:../img/icons.svg":"loVOp","./recipeView":"jSwDy","./searchView":"9M3GU","./bookmarkView":"bfvPN","./paginationView":"26Wmk"}],"gSXXb":[function(require,module,exports) {
 var global = require("76deb0be408cb4a9");
 var DESCRIPTORS = require("cb935020bf4b0c02");
 var defineBuiltInAccessor = require("ff1c3629469d584f");
@@ -2772,13 +2802,19 @@ parcelHelpers.defineInteropFlag(exports);
 var _iconsSvg = require("url:../img/icons.svg");
 var _iconsSvgDefault = parcelHelpers.interopDefault(_iconsSvg);
 class Model {
+    showSpinner = (state)=>{
+        const spinner = document.querySelector(".recipe").querySelector(".spinner");
+        state ? spinner.classList.remove("hidden") : spinner.classList.add("hidden");
+    };
     getRecipeData = async function() {
         let id;
         if (!window.location.hash) return;
         else id = window.location.hash;
         try {
+            this.showSpinner(true);
             const getData = await fetch(`https://forkify-api.herokuapp.com/api/v2/recipes/${id.slice(1)}`);
             const data = await getData.json();
+            this.showSpinner(false);
             let { recipe  } = data.data;
             recipe = {
                 cookingTime: recipe.cooking_time,
@@ -2804,7 +2840,6 @@ class Model {
       </div>
       `;
             document.querySelector(".recipe").insertAdjacentHTML("afterbegin", html);
-            throw new Error(err);
         }
     };
     getRecipesFromSearch = async function() {
@@ -2926,10 +2961,9 @@ class View {
                 <use href="${0, _iconsSvgDefault.default}#icon-check"></use>
                 </svg>
                 <div class="recipe__quantity">${ing.quantity ? (0, _fractyDefault.default)(ing.quantity) : ""}</div>
-                <div class="recipe__description">
                 <span class="recipe__unit">${ing.unit}</span>
-                ${ing.description}
-                </div>
+                <span>&nbsp</span>
+                <div class="recipe__description">${ing.description}</div>
             </li>
             `;
         }).join("")}
@@ -2955,39 +2989,68 @@ class View {
     </div>
     `;
         this.#parentElement.innerHTML = "";
+        this.#parentElement.insertAdjacentHTML("afterbegin", `<div class="spinner hidden">
+        <svg>
+          <use href="${(0, _iconsSvgDefault.default)}#icon-loader"></use>
+        </svg>
+      </div>`);
         this.#parentElement.insertAdjacentHTML("afterbegin", html);
     };
-    decreaseServings() {
-        const quantityEls = document.querySelectorAll(".recipe__quantity");
+    decreaseServings(currentRecipe) {
         const servings = document.querySelector(".recipe__info-data--people");
-        servings.innerHTML--;
-        quantityEls.forEach((el)=>{
-            el.innerHTML = Number(el.innerHTML) + (Number(el.innerHTML) / Number(servings.innerHTML)).toFixed(1);
+        if (servings.innerHTML <= 1) servings.innerHTML = 1;
+        else servings.innerHTML--;
+        const newServingsQuantity = servings.innerHTML;
+        // go over each recipe ingredient ( from js structure )
+        currentRecipe.ingredients.forEach((ingredient)=>{
+            // calculate the new ingredient quantity based on the new servings, starting from the data you have in the recipe data
+            // get quantity necessary for serving
+            const quantityPerServing = ingredient.quantity / currentRecipe.servings;
+            const newIngredientQuantity = (quantityPerServing * newServingsQuantity).toFixed(1);
+            // find the appropriate html element for current ingredient in the loop
+            // ingredient.description
+            const ingredientElements = document.querySelectorAll(".recipe__ingredient");
+            const ingredientElement = Array.from(ingredientElements).find((iE)=>iE.querySelector(".recipe__description").innerHTML === ingredient.description);
+            const ingredientQuantityElement = ingredientElement.querySelector(".recipe__quantity");
+            if (!ingredientQuantityElement.innerHTML) return;
+            ingredientQuantityElement.innerHTML = (0, _fractyDefault.default)(newIngredientQuantity);
         });
     }
-    increaseServings() {
-        const ingredientQuantityElements = document.querySelectorAll(".recipe__quantity");
+    increaseServings(currentRecipe) {
         const servings = document.querySelector(".recipe__info-data--people");
         servings.innerHTML++;
-        ingredientQuantityElements.forEach((el)=>{
-            const elementNumber = el.innerHTML.split(" ").map((el)=>Number(el).toFixed(1));
-            console.log(elementNumber);
-            if (!el.innerHTML) return;
-            const ingredientQuantity = Number(el.innerHTML);
-            const servingsQuantity = Number(servings.innerHTML);
-            let newIngredientQuantity = ingredientQuantity + ingredientQuantity / (servingsQuantity - 1);
-            el.innerHTML = (0, _fractyDefault.default)(newIngredientQuantity.toFixed(1));
+        const newServingsQuantity = servings.innerHTML;
+        // go over each recipe ingredient ( from js structure )
+        currentRecipe.ingredients.forEach((ingredient)=>{
+            // calculate the new ingredient quantity based on the new servings, starting from the data you have in the recipe data
+            // get quantity necessary for serving
+            const quantityPerServing = ingredient.quantity / currentRecipe.servings;
+            const newIngredientQuantity = (quantityPerServing * newServingsQuantity).toFixed(1);
+            // find the appropriate html element for current ingredient in the loop
+            // ingredient.description
+            const ingredientElements = document.querySelectorAll(".recipe__ingredient");
+            const ingredientElement = Array.from(ingredientElements).find((iE)=>iE.querySelector(".recipe__description").innerHTML === ingredient.description);
+            const ingredientQuantityElement = ingredientElement.querySelector(".recipe__quantity");
+            if (!ingredientQuantityElement.innerHTML) return;
+            ingredientQuantityElement.innerHTML = (0, _fractyDefault.default)(newIngredientQuantity);
         });
     }
 }
 exports.default = new View();
 
-},{"url:../img/icons.svg":"loVOp","fracty":"hJO4d","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"9M3GU":[function(require,module,exports) {
+},{"url:../img/icons.svg":"loVOp","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","fracty":"hJO4d"}],"9M3GU":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
+var _iconsSvg = require("url:../img/icons.svg");
+var _iconsSvgDefault = parcelHelpers.interopDefault(_iconsSvg);
 class SearchView {
     #parentElement = document.querySelector(".results");
+    showSpinner = (state)=>{
+        const spinner = this.#parentElement.querySelector(".spinner");
+        state ? spinner.classList.remove("hidden") : spinner.classList.add("hidden");
+    };
     renderSearchView(recipe) {
+        this.showSpinner(true);
         const html = `
     <li class="preview">
     <a
@@ -3004,11 +3067,12 @@ class SearchView {
     </a>
   </li>`;
         this.#parentElement.insertAdjacentHTML("afterbegin", html);
+        this.showSpinner(false);
     }
 }
 exports.default = new SearchView();
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"bfvPN":[function(require,module,exports) {
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","url:../img/icons.svg":"loVOp"}],"bfvPN":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 class BookmarkView {
@@ -3040,6 +3104,32 @@ class BookmarkView {
 }
 exports.default = new BookmarkView();
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}]},["d8XZh","aenu9"], "aenu9", "parcelRequire3a11")
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"26Wmk":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+var _iconsSvg = require("url:../img/icons.svg");
+var _iconsSvgDefault = parcelHelpers.interopDefault(_iconsSvg);
+class PaginationView {
+    #parentElement = document.querySelector(".pagination");
+    addPrevButton() {
+        this.#parentElement.insertAdjacentHTML("afterbegin", `<button class="btn--inline pagination__btn--prev" data-page-number="1">
+            <svg class="search__icon">
+                <use href="${(0, _iconsSvgDefault.default)}#icon-arrow-left"></use>
+            </svg>
+            <span>Page 1</span>
+        </button>`);
+    }
+    addNextButton() {
+        this.#parentElement.insertAdjacentHTML("beforeend", `<button class="btn--inline pagination__btn--next" data-page-number="3">
+        <span>Page 3</span>
+        <svg class="search__icon">
+            <use href="${(0, _iconsSvgDefault.default)}#icon-arrow-right"></use>
+        </svg>
+    </button>`);
+    }
+}
+exports.default = new PaginationView();
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","url:../img/icons.svg":"loVOp"}]},["d8XZh","aenu9"], "aenu9", "parcelRequire3a11")
 
 //# sourceMappingURL=index.e37f48ea.js.map

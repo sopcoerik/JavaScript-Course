@@ -1,18 +1,28 @@
 import icons from 'url:../img/icons.svg';
 
 class Model {
+  showSpinner = state => {
+    const spinner = document.querySelector('.recipe').querySelector('.spinner');
+
+    state
+      ? spinner.classList.remove('hidden')
+      : spinner.classList.add('hidden');
+  };
+
   getRecipeData = async function () {
     let id;
     if (!window.location.hash) return;
     else id = window.location.hash;
-
     try {
+      this.showSpinner(true);
       const getData = await fetch(
         `https://forkify-api.herokuapp.com/api/v2/recipes/${id.slice(1)}`
       );
-      const data = await getData.json();
-      let { recipe } = data.data;
 
+      const data = await getData.json();
+
+      this.showSpinner(false);
+      let { recipe } = data.data;
       recipe = {
         cookingTime: recipe.cooking_time,
         id: recipe.id,
@@ -38,7 +48,6 @@ class Model {
       </div>
       `;
       document.querySelector('.recipe').insertAdjacentHTML('afterbegin', html);
-      throw new Error(err);
     }
   };
 

@@ -8,6 +8,7 @@ import Model from './model';
 import View from './recipeView';
 import SearchView from './searchView';
 import BookmarkView from './bookmarkView';
+import PaginationView from './paginationView';
 
 const recipeContainer = document.querySelector('.recipe');
 const recipeSearchResults = document.querySelector('.results');
@@ -27,6 +28,10 @@ const timeout = function (s) {
 
 let bookmarkedRecipes = [];
 var recipe;
+
+PaginationView.addPrevButton();
+PaginationView.addNextButton();
+
 window.addEventListener('load', async function () {
   const recipe = await Model.getRecipeData();
   // View.renderRecipeView(recipe);
@@ -38,11 +43,21 @@ window.addEventListener('hashchange', async function () {
   // View.renderRecipeView(recipe);
   renderRecipe(recipe);
 });
+
 const renderRecipe = async function (recipe, state) {
   if (!recipe) recipe = await Model.getRecipeData();
 
-  recipe.bookmarked = recipe.bookmarked ? recipe.bookmarked : false;
-  View.renderRecipeView(recipe);
+  const isLoadedRecipeBookmarked = bookmarkedRecipes.find(
+    currentRecipe => recipe.id === currentRecipe.id
+  );
+  if (isLoadedRecipeBookmarked) {
+    isLoadedRecipeBookmarked.bookmarked = true;
+    View.renderRecipeView(isLoadedRecipeBookmarked);
+    recipe = isLoadedRecipeBookmarked;
+  } else {
+    recipe.bookmarked = false;
+    View.renderRecipeView(recipe);
+  }
 
   if (
     recipe.bookmarked ||
@@ -56,9 +71,7 @@ const renderRecipe = async function (recipe, state) {
 
   document.querySelector('.btn--round').addEventListener('click', function (e) {
     e.preventDefault();
-    bookmarkedRecipes =
-      JSON.parse(localStorage.getItem('bookmarkedRecipes')) || [];
-    console.log(bookmarkedRecipes);
+
     if (recipe.bookmarked) {
       recipe.bookmarked = false;
       // console.log(e.target);
@@ -134,13 +147,43 @@ document
   .querySelector('.search')
   .addEventListener('submit', async function (e) {
     e.preventDefault();
+    if (!document.querySelector('.search__field').value) return;
 
-    document.querySelector('.results').textContent = '';
+    recipeSearchResults.textContent = '';
+
+    recipeSearchResults.insertAdjacentHTML(
+      'afterbegin',
+      `
+      <div class="spinner">
+        <svg>
+          <use href="${icons}#icon-loader"></use>
+        </svg>
+      </div>`
+    );
 
     const searchedArr = await Model.getRecipesFromSearch();
 
     searchedArr.forEach(rec => SearchView.renderSearchView(rec));
   });
+
+const btnPreviousPage = document.querySelector('.pagination__btn--prev');
+const btnNextPage = document.querySelector('.pagination__btn--next');
+const elementsPerPage = 10;
+
+
+btnPreviousPage.addEventListener('click', function (e) {
+  e.preventDefault();
+  let pageNumber = e.target.closest('button').dataset.pageNumber;
+  console.log(`page ${pageNumber}`);
+  e.target.closest('button').dataset.pageNumber--;
+});
+
+btnNextPage.addEventListener('click', function (e) {
+  e.preventDefault();
+  let pageNumber = e.target.closest('button').dataset.pageNumber;
+  console.log(`page ${pageNumber}`);
+  e.target.closest('button').dataset.pageNumber++;
+});
 
 const getLocalStorage = () => {
   bookmarkedRecipes =
@@ -152,7 +195,6 @@ const getLocalStorage = () => {
     BookmarkView.addRecipeToBookmarks(recipe);
     delMessage();
   });
-  console.log(bookmarkedRecipes);
 };
 
 getLocalStorage();
