@@ -60,27 +60,26 @@ export const getRecipesFromSearch = async query => {
   const resultsJson = await results.json();
   const { recipes: recipesArr } = resultsJson.data;
 
-  state.search.results = recipesArr.map(currRecipe => {
-    let newRecipe;
-    return (newRecipe = {
-      id: currRecipe.id,
-      imageUrl: currRecipe.image_url,
-      publisher: currRecipe.publisher,
-      title: currRecipe.title,
-    });
-  });
+  state.search.results = recipesArr.map(currRecipe => ({
+    id: currRecipe.id,
+    imageUrl: currRecipe.image_url,
+    publisher: currRecipe.publisher,
+    title: currRecipe.title,
+  }));
 };
 
-export const updateRecipeServings = servings => {
+export const updateRecipeServings = newServings => {
+  const oldServings = state.recipe.servings;
+
+  state.recipe.servings = newServings;
+
   state.recipe.ingredients.forEach(ingredient => {
     // get quantity necessary for serving
-    const quantityPerServing = ingredient.quantity / state.recipe.servings;
+    const quantityPerServing = ingredient.quantity / oldServings;
     // calculate the new ingredient quantity based on the new servings, starting from the data you have in the recipe data
-    const newIngredientQuantity = (quantityPerServing * servings).toFixed(1);
+    const newIngredientQuantity = (quantityPerServing * newServings).toFixed(1);
     ingredient.quantity = newIngredientQuantity;
   });
-
-  state.recipe.servings = servings;
 };
 
 //addBookmark
@@ -107,3 +106,9 @@ export const initBookmarkedRecipes = () => {
 
   return bookmarkedRecipes;
 };
+
+const init = () => {
+  initBookmarkedRecipes();
+};
+
+init();

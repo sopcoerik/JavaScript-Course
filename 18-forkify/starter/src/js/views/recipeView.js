@@ -3,7 +3,8 @@ import fracty from '../../node_modules/fracty';
 import { showSpinner } from './helpers';
 
 class RecipeView {
-  #parentElement = document.querySelector('.recipe');
+  // extends main View
+  _parentElement = document.querySelector('.recipe');
 
   renderRecipeView = function (recipe) {
     const html = `
@@ -104,8 +105,15 @@ class RecipeView {
         </a>
     </div>
     `;
-    this.#parentElement.innerHTML = '';
-    this.#parentElement.insertAdjacentHTML(
+    this.renderSpinner();
+  };
+
+  // todo: implement and use
+  renderIngredient(ingredient) {}
+
+  renderSpinner() {
+    this._parentElement.innerHTML = '';
+    this._parentElement.insertAdjacentHTML(
       'afterbegin',
       `<div class="spinner hidden">
         <svg>
@@ -113,8 +121,8 @@ class RecipeView {
         </svg>
       </div>`
     );
-    this.#parentElement.insertAdjacentHTML('afterbegin', html);
-  };
+    this._parentElement.insertAdjacentHTML('afterbegin', html);
+  }
 
   decreaseServings(currentRecipe) {
     const servings = document.querySelector('.recipe__info-data--people');
