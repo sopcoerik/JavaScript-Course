@@ -4,11 +4,11 @@ import fracty from 'fracty';
 
 import icons from 'url:../img/icons.svg';
 import { updateLocalStorage } from './helpers';
-import { getRecipesFromSearch } from './model';
-import RecipeView from './recipeView';
-import SearchView from './searchView';
-import BookmarkView from './bookmarkView';
-import PaginationView from './paginationView';
+import { getRecipesFromSearch, state, getRecipeData } from './model';
+import RecipeView from './views/recipeView';
+import SearchView from './views/searchView';
+import BookmarkView from './views/bookmarkView';
+import PaginationView from './views/paginationView';
 
 const recipeContainer = document.querySelector('.recipe');
 const recipeSearchResults = document.querySelector('.results');
@@ -31,18 +31,25 @@ const getRecipeIdFromUrl = () => {
   return recipeId;
 };
 
-getRecipesFromSearch(SearchView.getSearchQuery());
+const handleSearchView = async () => {
+  const query = SearchView.getSearchQuery();
+
+  await getRecipesFromSearch(query);
+
+  SearchView.render(state.search.results);
+};
+
+SearchView.handleSubmitEvent(handleSearchView);
 
 // TODO: move rendering logic to the view
 // TODO: extract business logic in functions with clear names
 // TODO: rendeRecipe is huge and contains code which it is not it's responsibility. Refactor.
 
 const initLoadAndRenderRecipe = async () => {
-  RecipeView.showSpinner(true);
+  // RecipeView.showSpinner(true);
   const recipeId = getRecipeIdFromUrl();
-  const recipe = await Model.getRecipeData(recipeId);
+  const recipe = await getRecipeData(recipeId);
   recipeCurrent = recipe;
-  RecipeView.showSpinner('.recipe', true);
 };
 
 const checkIfRecipeIsBookmarked = recipe => {
@@ -51,10 +58,10 @@ const checkIfRecipeIsBookmarked = recipe => {
   );
   if (BookmarkedLoadedRecipe) {
     BookmarkedLoadedRecipe.bookmarked = true;
-    RecipeView.renderRecipeView(BookmarkedLoadedRecipe);
-    recipe = BookmarkedLoadedRecipe;
+    // RecipeView.renderRecipeView(BookmarkedLoadedRecipe);
+    recipeCurrent = BookmarkedLoadedRecipe;
   } else {
-    recipe.bookmarked = false;
+    // recipeCurrent.bookmarked = false;
     RecipeView.renderRecipeView(recipe);
   }
 

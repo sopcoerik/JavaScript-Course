@@ -1,35 +1,37 @@
-import { showSpinner } from './helpers';
+import View from './View.js';
 
-class SearchView {
-  #parentElement = document.querySelector('.results');
+class SearchView extends View {
+  _parentElement = document.querySelector('.results');
+  _errorMessage = `No recipes found for your query. Please try again!`;
 
   getSearchQuery = () => {
-    const query = document.querySelector('.search__field').value;
-    return query;
+    return document.querySelector('.search__field').value;
   };
 
-  renderSearchView(recipe) {
-    const html = `
-    <li class="preview">
-    <a
-      class="preview__link"
-      href="#${recipe.id}"
-    >
-      <figure class="preview__fig">
-        <img src="${recipe.image_url}" alt="Test" />
-      </figure>
-      <div class="preview__data">
-        <h4 class="preview__title">${recipe.title}</h4>
-        <p class="preview__publisher">${recipe.publisher}</p>
-      </div>
-    </a>
-  </li>`;
-
-    this.#parentElement.insertAdjacentHTML('afterbegin', html);
+  _generateMarkup() {
+    return this._data
+      .map(recipe => {
+        return `
+        <li class="preview">
+        <a class="preview__link" href="#${recipe.id}">
+          <figure class="preview__fig">
+            <img src="${recipe.image_url}" alt="Test" />
+          </figure>
+          <div class="preview__data">
+            <h4 class="preview__title">${recipe.title}</h4>
+            <p class="preview__publisher">${recipe.publisher}</p>
+          </div>
+        </a>
+      </li>`;
+      })
+      .join('');
   }
 
-  showSpinner(state) {
-    showSpinner('.results', state);
+  handleSubmitEvent(handlerFunction) {
+    document
+      .querySelector('.search')
+      .querySelector('.search__field')
+      .addEventListener('submit', handlerFunction);
   }
 }
 

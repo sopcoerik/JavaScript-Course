@@ -1,6 +1,5 @@
-import icons from 'url:../img/icons.svg';
-import fracty from '../../node_modules/fracty';
-import { showSpinner } from './helpers';
+import icons from 'url:../../img/icons.svg';
+import fracty from '../../../node_modules/fracty';
 
 class RecipeView {
   // extends main View
@@ -194,9 +193,9 @@ class RecipeView {
     });
   }
 
-  showSpinner(state) {
-    showSpinner('.recipe', state);
-  }
+  // showSpinner(state) {
+  //   showSpinner('.recipe', state);
+  // }
 
   servingsChangeListener() {
     document
