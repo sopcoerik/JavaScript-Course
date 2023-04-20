@@ -1,5 +1,6 @@
 import icons from 'url:../img/icons.svg';
 import fracty from 'fracty';
+import { showSpinner } from './helpers';
 
 class View {
   #parentElement = document.querySelector('.recipe');
@@ -183,6 +184,10 @@ class View {
 
       ingredientQuantityElement.innerHTML = fracty(newIngredientQuantity);
     });
+  }
+
+  showSpinner(state) {
+    showSpinner('.recipe', state);
   }
 }
 

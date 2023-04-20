@@ -1,31 +1,18 @@
 import icons from 'url:../img/icons.svg';
 
 class Model {
-  showSpinner = state => {
-    const spinner = document.querySelector('.recipe').querySelector('.spinner');
-
-    state
-      ? spinner.classList.remove('hidden')
-      : spinner.classList.add('hidden');
-  };
-
-  getRecipeData = async function () {
-    let id;
-    if (!window.location.hash) return;
-    else id = window.location.hash;
+  getRecipeData = async function (recipeId) {
     try {
-      this.showSpinner(true);
       const getData = await fetch(
-        `https://forkify-api.herokuapp.com/api/v2/recipes/${id.slice(1)}`
+        `https://forkify-api.herokuapp.com/api/v2/recipes/${recipeId.slice(1)}`
       );
 
       const data = await getData.json();
 
-      this.showSpinner(false);
       let { recipe } = data.data;
       recipe = {
         cookingTime: recipe.cooking_time,
-        id: recipe.id,
+        recipeId: recipe.recipeId,
         imageUrl: recipe.image_url,
         ingredients: recipe.ingredients,
         publisher: recipe.publisher,
@@ -36,6 +23,10 @@ class Model {
 
       return recipe;
     } catch (err) {
+      // recipeView.showError() -> but don't call it here!
+      // the controller handles the errors
+      // the controller is the glue between model and view
+      // DON'T CALL VIEW OR CONTROLLER FUNCTIONS IN THE MODEL
       document.querySelector('.recipe').textContent = '';
       const html = `
       <div class="error">

@@ -1,12 +1,11 @@
 import 'core-js/stable';
 import 'regenerator-runtime';
 import fracty from 'fracty';
-import { showSpinner } from './helpers';
 
 import icons from 'url:../img/icons.svg';
 
 import Model from './model';
-import View from './recipeView';
+import RecipeView from './recipeView';
 import SearchView from './searchView';
 import BookmarkView from './bookmarkView';
 import PaginationView from './paginationView';
@@ -33,30 +32,34 @@ var recipe;
 PaginationView.addPrevButton();
 PaginationView.addNextButton();
 
-const loadAndRenderRecipe = async () => {
-  const recipe = await Model.getRecipeData();
-  // View.renderRecipeView(recipe);
-  renderRecipe(recipe);
-};
-
 window.addEventListener('load', loadAndRenderRecipe);
 window.addEventListener('hashchange', loadAndRenderRecipe);
+
+const getRecipeIdFromUrl = () => {
+  let recipeId;
+  if (window.location.hash) recipeId = window.location.hash;
+
+  return recipeId;
+};
 // TODO: move rendering logic to the view
 // TODO: extract business logic in functions with clear names
 // TODO: rendeRecipe is huge and contains code which it is not it's responsibility. Refactor.
-const renderRecipe = async function (recipe) {
-  if (!recipe) recipe = await Model.getRecipeData();
+const loadAndRenderRecipe = async function () {
+  RecipeView.showSpinner(true);
+  const recipeId = getRecipeIdFromUrl();
+  const recipe = await Model.getRecipeData(recipeId);
+  RecipeView.showSpinner('.recipe', true);
 
   const isLoadedRecipeBookmarked = bookmarkedRecipes.find(
     currentRecipe => recipe.id === currentRecipe.id
   );
   if (isLoadedRecipeBookmarked) {
     isLoadedRecipeBookmarked.bookmarked = true;
-    View.renderRecipeView(isLoadedRecipeBookmarked);
+    RecipeView.renderRecipeView(isLoadedRecipeBookmarked);
     recipe = isLoadedRecipeBookmarked;
   } else {
     recipe.bookmarked = false;
-    View.renderRecipeView(recipe);
+    RecipeView.renderRecipeView(recipe);
   }
 
   if (
@@ -107,10 +110,10 @@ const renderRecipe = async function (recipe) {
 
   document
     .querySelector('.btn--increase-servings')
-    .addEventListener('click', () => View.increaseServings(recipe));
+    .addEventListener('click', () => RecipeView.increaseServings(recipe));
   document
     .querySelector('.btn--decrease-servings')
-    .addEventListener('click', () => View.decreaseServings(recipe));
+    .addEventListener('click', () => RecipeView.decreaseServings(recipe));
 };
 
 const delMessage = () => {
@@ -126,10 +129,11 @@ recipeSearchResults.addEventListener('click', function (e) {
     const link = e.target.closest('.preview').querySelector('.preview__link');
     window.location.hash = link.getAttribute('href');
     link.classList.add('preview__link--active');
-    renderRecipe();
+    loadAndRenderRecipe();
   }
 });
 
+//todo: extract into function with meaningful name
 document.querySelector('.bookmarks').addEventListener('click', function (e) {
   if (e.target.closest('.preview')) {
     e.target
@@ -139,7 +143,7 @@ document.querySelector('.bookmarks').addEventListener('click', function (e) {
     const link = e.target.closest('.preview').querySelector('.preview__link');
     window.location.hash = link.getAttribute('href');
     link.classList.add('preview__link--active');
-    renderRecipe(undefined, true);
+    loadAndRenderRecipe();
   }
 });
 
