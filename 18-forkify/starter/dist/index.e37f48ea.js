@@ -3125,6 +3125,7 @@ class View {
     _data;
     _errorMessage;
     _parentElement;
+    _message;
     render(data) {
         this._data = data;
         const markup = _generateMarkup(); // this function is individual for every view
@@ -3157,6 +3158,21 @@ class View {
     </div>
     `;
         this._parentElement.insertAdjacentHTML("afterbegin", errorMessage);
+    }
+    renderMessage() {
+        const message = `
+    <div class="message">
+    <div>
+      <svg>
+        <use href="${(0, _iconsSvgDefault.default)}#icon-smile"></use>
+      </svg>
+    </div>
+    <p>
+      ${this._message};
+    </p>
+  </div>
+    `;
+        this._parentElement.insertAdjacentHTML("afterbegin", message);
     }
 }
 exports.default = View;

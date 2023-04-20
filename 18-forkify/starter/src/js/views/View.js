@@ -10,6 +10,7 @@ export default class View {
   _data;
   _errorMessage;
   _parentElement;
+  _message;
 
   render(data) {
     this._data = data;
@@ -49,5 +50,22 @@ export default class View {
     `;
 
     this._parentElement.insertAdjacentHTML('afterbegin', errorMessage);
+  }
+
+  renderMessage() {
+    const message = `
+    <div class="message">
+    <div>
+      <svg>
+        <use href="${icons}#icon-smile"></use>
+      </svg>
+    </div>
+    <p>
+      ${this._message};
+    </p>
+  </div>
+    `;
+
+    this._parentElement.insertAdjacentHTML('afterbegin', message);
   }
 }
