@@ -1,5 +1,3 @@
-import icons from 'url:../img/icons.svg';
-
 class Model {
   state = {
     recipe: {},
@@ -32,44 +30,58 @@ class Model {
         title: recipe.title,
       };
 
-      return recipe;
+      state.recipe = recipe;
     } catch (err) {
-      // recipeView.showError() -> but don't call it here!
-      // the controller handles the errors
-      // the controller is the glue between model and view
-      // DON'T CALL VIEW OR CONTROLLER FUNCTIONS IN THE MODEL
-      document.querySelector('.recipe').textContent = '';
-      const html = `
-      <div class="error">
-        <div>
-          <svg>
-            <use href="${icons}#icon-alert-triangle"></use>
-          </svg>
-        </div>
-        <p>No recipes found for your query. Please try again!</p>
-      </div>
-      `;
-      document.querySelector('.recipe').insertAdjacentHTML('afterbegin', html);
+      throw new Error(err);
     }
   };
+  // } catch (err) {
+  //   // recipeView.showError() -> but don't call it here!
+  //   // the controller handles the errors
+  //   // the controller is the glue between model and view
+  //   // DON'T CALL VIEW OR CONTROLLER FUNCTIONS IN THE MODEL
+  //   document.querySelector('.recipe').textContent = '';
+  //   const html = `
+  //   <div class="error">
+  //     <div>
+  //       <svg>
+  //         <use href="${icons}#icon-alert-triangle"></use>
+  //       </svg>
+  //     </div>
+  //     <p>No recipes found for your query. Please try again!</p>
+  //   </div>
+  //   `;
+  //   document.querySelector('.recipe').insertAdjacentHTML('afterbegin', html);
+  // }
 
   getRecipesFromSearch = async function () {
-    const query = document.querySelector('.search__field').value;
+    this.state.query = document.querySelector('.search__field').value;
     const getResults = fetch(
-      `https://forkify-api.herokuapp.com/api/v2/recipes?search=${query}`
+      `https://forkify-api.herokuapp.com/api/v2/recipes?search=${this.state.query}`
     );
     const results = await getResults;
     const results2 = await results.json();
     const { recipes: recipesArr } = results2.data;
 
-    return recipesArr;
+    recipesArr.forEach(recipe => state.results.push(recipe));
   };
 
   // updateServings
+  updateRecipeServings(servings) {
+    this.state.recipe.servings = servings;
+  }
 
   //addBookmark
-
+  addRecipeToBookmarks(recipe) {
+    this.state.bookmarks.push(recipe);
+  }
   // deleteBookmark
+  deleteRecipeFromBookmarks(recipe) {
+    const recipeIndex = this.state.bookmarks.findIndex(
+      recipeCurr => recipe.id === recipeCurr.id
+    );
+    this.state.bookmarks.splice(recipeIndex, 1);
+  }
 }
 
 export default new Model();
