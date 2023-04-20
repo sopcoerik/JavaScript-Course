@@ -30,7 +30,7 @@ class Model {
         title: recipe.title,
       };
 
-      state.recipe = recipe;
+      this.state.recipe = recipe;
     } catch (err) {
       throw new Error(err);
     }
@@ -63,7 +63,7 @@ class Model {
     const results2 = await results.json();
     const { recipes: recipesArr } = results2.data;
 
-    recipesArr.forEach(recipe => state.results.push(recipe));
+    recipesArr.forEach(recipe => this.state.results.push(recipe));
   };
 
   // updateServings
@@ -75,6 +75,7 @@ class Model {
   addRecipeToBookmarks(recipe) {
     this.state.bookmarks.push(recipe);
   }
+
   // deleteBookmark
   deleteRecipeFromBookmarks(recipe) {
     const recipeIndex = this.state.bookmarks.findIndex(
