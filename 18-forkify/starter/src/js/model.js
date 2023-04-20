@@ -1,6 +1,17 @@
 import icons from 'url:../img/icons.svg';
 
 class Model {
+  state = {
+    recipe: {},
+    bookmarks: [],
+    search: {
+      query: '',
+      results: [],
+      // page: 1
+    },
+  };
+
+  // update following functions to update the state when called.
   getRecipeData = async function (recipeId) {
     try {
       const getData = await fetch(
@@ -53,6 +64,12 @@ class Model {
 
     return recipesArr;
   };
+
+  // updateServings
+
+  //addBookmark
+
+  // deleteBookmark
 }
 
 export default new Model();
