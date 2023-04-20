@@ -3,7 +3,7 @@ import 'regenerator-runtime';
 import fracty from 'fracty';
 
 import icons from 'url:../img/icons.svg';
-
+import { updateLocalStorage } from './helpers';
 import Model from './model';
 import RecipeView from './recipeView';
 import SearchView from './searchView';
@@ -13,27 +13,16 @@ import PaginationView from './paginationView';
 const recipeContainer = document.querySelector('.recipe');
 const recipeSearchResults = document.querySelector('.results');
 
-const timeout = function (s) {
-  return new Promise(function (_, reject) {
-    setTimeout(function () {
-      reject(new Error(`Request took too long! Timeout after ${s} second`));
-    }, s * 1000);
-  });
-};
-
 // https://forkify-api.herokuapp.com/v2
 // 5ed6604591c37cdc054bcd09
 
 ///////////////////////////////////////
 
 let bookmarkedRecipes = [];
-var recipe;
+let recipeCurrent;
 
 PaginationView.addPrevButton();
 PaginationView.addNextButton();
-
-window.addEventListener('load', loadAndRenderRecipe);
-window.addEventListener('hashchange', loadAndRenderRecipe);
 
 const getRecipeIdFromUrl = () => {
   let recipeId;
@@ -44,81 +33,45 @@ const getRecipeIdFromUrl = () => {
 // TODO: move rendering logic to the view
 // TODO: extract business logic in functions with clear names
 // TODO: rendeRecipe is huge and contains code which it is not it's responsibility. Refactor.
-const loadAndRenderRecipe = async function () {
+
+const initLoadAndRenderRecipe = async () => {
   RecipeView.showSpinner(true);
   const recipeId = getRecipeIdFromUrl();
   const recipe = await Model.getRecipeData(recipeId);
+  recipeCurrent = recipe;
   RecipeView.showSpinner('.recipe', true);
+};
 
-  const isLoadedRecipeBookmarked = bookmarkedRecipes.find(
+const checkIfRecipeIsBookmarked = recipe => {
+  const BookmarkedLoadedRecipe = bookmarkedRecipes.find(
     currentRecipe => recipe.id === currentRecipe.id
   );
-  if (isLoadedRecipeBookmarked) {
-    isLoadedRecipeBookmarked.bookmarked = true;
-    RecipeView.renderRecipeView(isLoadedRecipeBookmarked);
-    recipe = isLoadedRecipeBookmarked;
+  if (BookmarkedLoadedRecipe) {
+    BookmarkedLoadedRecipe.bookmarked = true;
+    RecipeView.renderRecipeView(BookmarkedLoadedRecipe);
+    recipe = BookmarkedLoadedRecipe;
   } else {
     recipe.bookmarked = false;
     RecipeView.renderRecipeView(recipe);
   }
 
-  if (
-    recipe.bookmarked ||
-    bookmarkedRecipes.find(recipeCurr => recipeCurr.id === recipe.id)
-  ) {
-    document
-      .querySelector('.btn--round')
-      .querySelector('use')
-      .setAttribute('href', `${icons}#icon-bookmark-fill`);
+  if (recipe.bookmarked || BookmarkedLoadedRecipe) {
+    BookmarkView.fillBookmarkIcon(icons);
   }
-
-  document.querySelector('.btn--round').addEventListener('click', function (e) {
-    e.preventDefault();
-
-    if (recipe.bookmarked) {
-      recipe.bookmarked = false;
-      // console.log(e.target);
-      e.target
-        .closest('.btn--round')
-        .querySelector('use')
-        .setAttribute('href', `${icons}#icon-bookmark`);
-      const indexOfCurrentRecipe = bookmarkedRecipes.findIndex(
-        currRecipe => currRecipe.id === recipe.id
-      );
-      BookmarkView.delRecipeFromBookmarks(recipe);
-      bookmarkedRecipes.splice(indexOfCurrentRecipe, 1);
-      localStorage.setItem(
-        'bookmarkedRecipes',
-        JSON.stringify(bookmarkedRecipes)
-      );
-      return;
-    } else {
-      e.target
-        .closest('.btn--round')
-        .querySelector('use')
-        .setAttribute('href', `${icons}#icon-bookmark-fill`);
-
-      bookmarkedRecipes.push(recipe);
-      localStorage.setItem(
-        'bookmarkedRecipes',
-        JSON.stringify(bookmarkedRecipes)
-      );
-      BookmarkView.addRecipeToBookmarks(recipe);
-      delMessage();
-    }
-  });
-
-  document
-    .querySelector('.btn--increase-servings')
-    .addEventListener('click', () => RecipeView.increaseServings(recipe));
-  document
-    .querySelector('.btn--decrease-servings')
-    .addEventListener('click', () => RecipeView.decreaseServings(recipe));
 };
 
-const delMessage = () => {
-  document.querySelector('.message').style.display = 'none';
+const listenForBookmarkButtonClick = () => {
+  BookmarkView.bookmarkListener(icons, recipeCurrent, bookmarkedRecipes);
 };
+
+const loadAndRenderRecipe = function () {
+  initLoadAndRenderRecipe();
+  checkIfRecipeIsBookmarked(recipeCurrent);
+  listenForBookmarkButtonClick();
+};
+
+window.addEventListener('load', loadAndRenderRecipe);
+window.addEventListener('hashchange', loadAndRenderRecipe);
 
 recipeSearchResults.addEventListener('click', function (e) {
   if (e.target.closest('.preview')) {

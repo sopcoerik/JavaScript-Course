@@ -1,8 +1,8 @@
 import icons from 'url:../img/icons.svg';
-import fracty from 'fracty';
+import fracty from '../../node_modules/fracty';
 import { showSpinner } from './helpers';
 
-class View {
+class RecipeView {
   #parentElement = document.querySelector('.recipe');
 
   renderRecipeView = function (recipe) {
@@ -189,6 +189,15 @@ class View {
   showSpinner(state) {
     showSpinner('.recipe', state);
   }
+
+  servingsChangeListener() {
+    document
+      .querySelector('.btn--increase-servings')
+      .addEventListener('click', () => increaseServings(recipe));
+    document
+      .querySelector('.btn--decrease-servings')
+      .addEventListener('click', () => decreaseServings(recipe));
+  }
 }
 
-export default new View();
+export default new RecipeView();

@@ -31,6 +31,50 @@ class BookmarkView {
       }
     });
   }
+
+  delMessage() {
+    document.querySelector('.message').style.display = 'none';
+  }
+
+  fillBookmarkIcon(icons, e) {
+    e.target
+      .querySelector('.btn--round')
+      .querySelector('use')
+      .setAttribute('href', `${icons}#icon-bookmark-fill`);
+  }
+
+  unfillBookmarkIcon(icons, e) {
+    e.target
+      .closest('.btn--round')
+      .querySelector('use')
+      .setAttribute('href', `${icons}#icon-bookmark`);
+  }
+
+  bookmarkListener(icons, recipe, bookmarkedRecipes) {
+    const bookmarkButton = document.querySelector('.btn--round');
+
+    bookmarkButton.addEventListener('click', function (e) {
+      e.preventDefault();
+      if (recipe.bookmarked) {
+        recipe.bookmarked = false;
+        unfillBookmarkIcon(icons, e);
+        const indexOfCurrentRecipe = bookmarkedRecipes.findIndex(
+          curr => curr.id === recipe.id
+        );
+        delRecipeFromBookmarks(recipe);
+        bookmarkedRecipes.splice(indexOfCurrentRecipe, 1);
+        updateLocalStorage(bookmarkedRecipes);
+        return bookmarkedRecipes;
+      } else {
+        fillBookmarkIcon(icons, e);
+        bookmarkedRecipes.push(recipe);
+        updateLocalStorage(bookmarkedRecipes);
+        addRecipeToBookmarks(recipe);
+        delMessage();
+        return bookmarkedRecipes;
+      }
+    });
+  }
 }
 
 export default new BookmarkView();

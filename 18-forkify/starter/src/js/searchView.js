@@ -1,18 +1,9 @@
-import icons from 'url:../img/icons.svg';
+import { showSpinner } from './helpers';
 
 class SearchView {
   #parentElement = document.querySelector('.results');
 
-  showSpinner = state => {
-    const spinner = this.#parentElement.querySelector('.spinner');
-
-    state
-      ? spinner.classList.remove('hidden')
-      : spinner.classList.add('hidden');
-  };
-
   renderSearchView(recipe) {
-    this.showSpinner(true);
     const html = `
     <li class="preview">
     <a
@@ -30,7 +21,10 @@ class SearchView {
   </li>`;
 
     this.#parentElement.insertAdjacentHTML('afterbegin', html);
-    this.showSpinner(false);
+  }
+
+  showSpinner(state) {
+    showSpinner('.results', state);
   }
 }
 
