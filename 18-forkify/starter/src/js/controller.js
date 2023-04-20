@@ -1,6 +1,7 @@
 import 'core-js/stable';
 import 'regenerator-runtime';
 import fracty from 'fracty';
+import { showSpinner } from './helpers';
 
 import icons from 'url:../img/icons.svg';
 
@@ -32,19 +33,18 @@ var recipe;
 PaginationView.addPrevButton();
 PaginationView.addNextButton();
 
-window.addEventListener('load', async function () {
+const loadAndRenderRecipe = async () => {
   const recipe = await Model.getRecipeData();
   // View.renderRecipeView(recipe);
   renderRecipe(recipe);
-});
-window.addEventListener('hashchange', async function () {
-  const recipe = await Model.getRecipeData();
+};
 
-  // View.renderRecipeView(recipe);
-  renderRecipe(recipe);
-});
-
-const renderRecipe = async function (recipe, state) {
+window.addEventListener('load', loadAndRenderRecipe);
+window.addEventListener('hashchange', loadAndRenderRecipe);
+// TODO: move rendering logic to the view
+// TODO: extract business logic in functions with clear names
+// TODO: rendeRecipe is huge and contains code which it is not it's responsibility. Refactor.
+const renderRecipe = async function (recipe) {
   if (!recipe) recipe = await Model.getRecipeData();
 
   const isLoadedRecipeBookmarked = bookmarkedRecipes.find(
@@ -169,7 +169,6 @@ document
 const btnPreviousPage = document.querySelector('.pagination__btn--prev');
 const btnNextPage = document.querySelector('.pagination__btn--next');
 const elementsPerPage = 10;
-
 
 btnPreviousPage.addEventListener('click', function (e) {
   e.preventDefault();

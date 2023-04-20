@@ -1,5 +1,6 @@
 import icons from 'url:../img/icons.svg';
 import fracty from 'fracty';
+
 class View {
   #parentElement = document.querySelector('.recipe');
 
