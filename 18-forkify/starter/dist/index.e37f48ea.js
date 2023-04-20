@@ -3063,6 +3063,10 @@ parcelHelpers.defineInteropFlag(exports);
 var _helpers = require("./helpers");
 class SearchView {
     #parentElement = document.querySelector(".results");
+    getSearchQuery = ()=>{
+        const query = document.querySelector(".search__field").value;
+        return query;
+    };
     renderSearchView(recipe) {
         const html = `
     <li class="preview">

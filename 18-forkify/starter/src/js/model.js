@@ -51,7 +51,6 @@ export const getRecipeData = async function (recipeId) {
 //   document.querySelector('.recipe').insertAdjacentHTML('afterbegin', html);
 // }
 
-// todo: will move this somewhere else: document.querySelector('.search__field').value;
 export const getRecipesFromSearch = async query => {
   state.query = query;
   const getResults = fetch(
@@ -61,22 +60,34 @@ export const getRecipesFromSearch = async query => {
   const resultsJson = await results.json();
   const { recipes: recipesArr } = resultsJson.data;
 
-  //TODO: use map to get new state. transform the imageurl to the correct atrribute
-  recipesArr.forEach(recipe => state.results.push(recipe));
+  state.search.results = recipesArr.map(currRecipe => {
+    let newRecipe;
+    return (newRecipe = {
+      id: currRecipe.id,
+      imageUrl: currRecipe.image_url,
+      publisher: currRecipe.publisher,
+      title: currRecipe.title,
+    });
+  });
 };
 
-// updateServings
 export const updateRecipeServings = servings => {
+  state.recipe.ingredients.forEach(ingredient => {
+    // get quantity necessary for serving
+    const quantityPerServing = ingredient.quantity / state.recipe.servings;
+    // calculate the new ingredient quantity based on the new servings, starting from the data you have in the recipe data
+    const newIngredientQuantity = (quantityPerServing * servings).toFixed(1);
+    ingredient.quantity = newIngredientQuantity;
+  });
+
   state.recipe.servings = servings;
-  // TODO: ADD THE logic that calculates the recipe.ingredients quantity here. update the recipe ingredients state.
 };
 
 //addBookmark
 export const addRecipeToBookmarks = recipe => {
+  state.recipe.bookmarked = true;
   state.bookmarks.push(recipe);
-  // where do you mark the current recipe as bookmarked?  (maybe add state.recipe.bookmarked)
-
-  // where do you persist bookmarks ?
+  localStorage.setItem('bookmarkedRecipes', JSON.stringify(state.bookmarks));
 };
 
 // deleteBookmark
@@ -85,7 +96,14 @@ export const deleteRecipeFromBookmarks = recipe => {
     recipeCurr => recipe.id === recipeCurr.id
   );
   state.bookmarks.splice(recipeIndex, 1);
-  // persistence of bookmarks ?
+
+  localStorage.setItem('bookmarkedRecipes', JSON.stringify(state.bookmarks));
 };
 
-// TODO: init function which initializes the bookmarks from local storage
+export const initBookmarkedRecipes = () => {
+  const bookmarkedRecipes = JSON.parse(
+    localStorage.getItem('bookmarkedRecipes')
+  );
+
+  return bookmarkedRecipes;
+};

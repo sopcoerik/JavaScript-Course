@@ -4,7 +4,7 @@ import fracty from 'fracty';
 
 import icons from 'url:../img/icons.svg';
 import { updateLocalStorage } from './helpers';
-import Model from './model';
+import { getRecipesFromSearch } from './model';
 import RecipeView from './recipeView';
 import SearchView from './searchView';
 import BookmarkView from './bookmarkView';
@@ -30,6 +30,9 @@ const getRecipeIdFromUrl = () => {
 
   return recipeId;
 };
+
+getRecipesFromSearch(SearchView.getSearchQuery());
+
 // TODO: move rendering logic to the view
 // TODO: extract business logic in functions with clear names
 // TODO: rendeRecipe is huge and contains code which it is not it's responsibility. Refactor.
@@ -119,7 +122,7 @@ document
     );
 
     const searchedArr = await Model.getRecipesFromSearch();
-
+    console.log(searchedArr);
     searchedArr.forEach(rec => SearchView.renderSearchView(rec));
   });
 
