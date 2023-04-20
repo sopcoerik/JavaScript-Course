@@ -19,7 +19,8 @@ class Model {
       const data = await getData.json();
 
       let { recipe } = data.data;
-      recipe = {
+
+      this.state.recipe = {
         cookingTime: recipe.cooking_time,
         recipeId: recipe.recipeId,
         imageUrl: recipe.image_url,
@@ -29,8 +30,6 @@ class Model {
         sourceUrl: recipe.source_url,
         title: recipe.title,
       };
-
-      this.state.recipe = recipe;
     } catch (err) {
       throw new Error(err);
     }
