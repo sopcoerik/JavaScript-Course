@@ -45,6 +45,7 @@ class BookmarkView extends View {
       }
     });
   }
+
   fillBookmarkButton() {
     document
       .querySelector('.recipe')

@@ -12,6 +12,7 @@ import {
 import RecipeView from './views/recipeView';
 import SearchView from './views/searchView';
 import BookmarkView from './views/bookmarkView';
+import PreviewLinks from './views/activeLinksView';
 import ServingsView from './views/servingsView';
 
 // https://forkify-api.herokuapp.com/v2
@@ -20,6 +21,9 @@ import ServingsView from './views/servingsView';
 ///////////////////////////////////////
 
 // -------------------------------------------------------------------------------------------------------
+
+// ---------------------Checking for active links
+PreviewLinks.checkForActiveLinks();
 
 // ---------------------Getting Recipes From URL
 const getRecipeIdFromUrl = () => {
@@ -40,8 +44,6 @@ const handleSearchView = async () => {
   SearchView.render(state.search.results);
 };
 
-SearchView.addSubmitListener(handleSearchView);
-
 // --------------------Handling Recipe View
 const handleRecipeView = async () => {
   if (window.location.hash) {
@@ -54,15 +56,13 @@ const handleRecipeView = async () => {
     RecipeView.render(state.recipe);
 
     state.bookmarks.forEach(bookmarkedRecipe => {
-      if (state.recipe.id === bookmarkedRecipe.id) {
+      if (state.recipe.recipeId === bookmarkedRecipe.recipeId) {
         state.recipe.bookmarked = true;
         BookmarkView.fillBookmarkButton();
       }
     });
   }
 };
-
-RecipeView.addRecipeRenderEventListener(handleRecipeView);
 
 // -------------------Handling Bookmark View
 
@@ -89,8 +89,6 @@ const handleBookmarkView = () => {
   }
 };
 
-BookmarkView.addBookmarkEventListener(handleBookmarkView);
-
 const renderBookmarksOnLoadEvent = () => {
   if (state.bookmarks.length === 0) {
     BookmarkView.renderMessage();
@@ -100,10 +98,16 @@ const renderBookmarksOnLoadEvent = () => {
   );
 };
 
-BookmarkView.addLoadEventListenerForBookmarkMessage(renderBookmarksOnLoadEvent);
+const init = () => {
+  SearchView.addSubmitListener(handleSearchView);
+  RecipeView.addRecipeRenderEventListener(handleRecipeView);
+  BookmarkView.addBookmarkEventListener(handleBookmarkView);
+  BookmarkView.addLoadEventListenerForBookmarkMessage(
+    renderBookmarksOnLoadEvent
+  );
+};
 
-// todo:
-// create an init function in controller. in which you add listeners
+init();
 
 // ------------------------------------------------------------------------------------------------------
 

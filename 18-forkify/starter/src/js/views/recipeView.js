@@ -120,18 +120,6 @@ class RecipeView extends View {
   // todo: implement and use
   renderIngredient(ingredient) {}
 }
-// renderSpinner() {
-//   this._parentElement.innerHTML = '';
-//   this._parentElement.insertAdjacentHTML(
-//     'afterbegin',
-//     `<div class="spinner hidden">
-//       <svg>
-//         <use href="${icons}#icon-loader"></use>
-//       </svg>
-//     </div>`
-//   );
-//   this._parentElement.insertAdjacentHTML('afterbegin', html);
-// }
 
 //   decreaseServings(currentRecipe) {
 //     const servings = document.querySelector('.recipe__info-data--people');
@@ -204,10 +192,6 @@ class RecipeView extends View {
 //       ingredientQuantityElement.innerHTML = fracty(newIngredientQuantity);
 //     });
 //   }
-
-//   // showSpinner(state) {
-//   //   showSpinner('.recipe', state);
-//   // }
 
 //   servingsChangeListener() {
 //     document
