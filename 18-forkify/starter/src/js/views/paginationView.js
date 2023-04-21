@@ -1,10 +1,11 @@
 import icons from 'url:../../img/icons.svg';
+import View from './View.js';
 
-class PaginationView {
-  #parentElement = document.querySelector('.pagination');
+class PaginationView extends View {
+  _parentElement = document.querySelector('.pagination');
 
   addPrevButton() {
-    this.#parentElement.insertAdjacentHTML(
+    this._parentElement.insertAdjacentHTML(
       'afterbegin',
       `<button class="btn--inline pagination__btn--prev" data-page-number="1">
             <svg class="search__icon">
@@ -16,7 +17,7 @@ class PaginationView {
   }
 
   addNextButton() {
-    this.#parentElement.insertAdjacentHTML(
+    this._parentElement.insertAdjacentHTML(
       'beforeend',
       `<button class="btn--inline pagination__btn--next" data-page-number="3">
         <span>Page 3</span>

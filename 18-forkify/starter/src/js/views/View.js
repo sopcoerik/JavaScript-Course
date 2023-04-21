@@ -39,7 +39,7 @@ export default class View {
       // Updates based on TEXT-CHANGE
       if (
         !newEl.isEqualNode(currEl) &&
-        newEl.firstChild.nodeValue.trim() !== ''
+        newEl.firstChild?.nodeValue.trim() !== ''
       ) {
         currEl.textContent = newEl.textContent;
       }
