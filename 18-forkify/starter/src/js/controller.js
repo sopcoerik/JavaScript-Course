@@ -1,9 +1,6 @@
 import 'core-js/stable';
 import 'regenerator-runtime';
-import fracty from 'fracty';
 
-import icons from 'url:../img/icons.svg';
-import { updateLocalStorage } from './helpers';
 import {
   getRecipesFromSearch,
   state,
@@ -11,24 +8,16 @@ import {
   addRecipeToBookmarks,
   deleteRecipeFromBookmarks,
 } from './model';
+
 import RecipeView from './views/recipeView';
 import SearchView from './views/searchView';
 import BookmarkView from './views/bookmarkView';
-import PaginationView from './views/paginationView';
-
-const recipeContainer = document.querySelector('.recipe');
-const recipeSearchResults = document.querySelector('.results');
+import ServingsView from './views/servingsView';
 
 // https://forkify-api.herokuapp.com/v2
 // 5ed6604591c37cdc054bcd09
 
 ///////////////////////////////////////
-
-let bookmarkedRecipes = [];
-let recipeCurrent;
-
-PaginationView.addPrevButton();
-PaginationView.addNextButton();
 
 // -------------------------------------------------------------------------------------------------------
 
@@ -42,6 +31,8 @@ const getRecipeIdFromUrl = () => {
 
 // ---------------------Handling Search View
 const handleSearchView = async () => {
+  SearchView.renderSpinner();
+
   const query = SearchView.getSearchQuery();
 
   await getRecipesFromSearch(query);
@@ -49,165 +40,96 @@ const handleSearchView = async () => {
   SearchView.render(state.search.results);
 };
 
-SearchView.handleSubmitEvent(handleSearchView);
+SearchView.addSubmitListener(handleSearchView);
 
 // --------------------Handling Recipe View
 const handleRecipeView = async () => {
   if (window.location.hash) {
+    RecipeView.renderSpinner();
+
     const recipeId = getRecipeIdFromUrl();
+
     await getRecipeData(recipeId);
 
     RecipeView.render(state.recipe);
 
-    callBookmarkEventHandler();
+    state.bookmarks.forEach(bookmarkedRecipe => {
+      if (state.recipe.id === bookmarkedRecipe.id) {
+        state.recipe.bookmarked = true;
+        BookmarkView.fillBookmarkButton();
+      }
+    });
   }
 };
 
-RecipeView.handleRecipeRenderEvents(handleRecipeView);
+RecipeView.addRecipeRenderEventListener(handleRecipeView);
 
 // -------------------Handling Bookmark View
-const handleAddBookmarkView = () => {
-  BookmarkView.bookmarkViewMessageToggler();
 
-  BookmarkView.fillBookmarkIcon(icons);
+const handleBookmarkView = () => {
+  if (!state.recipe.bookmarked) {
+    BookmarkView.bookmarkViewMessageToggler();
 
-  BookmarkView.render(state.recipe);
+    BookmarkView.render(state.recipe);
 
-  addRecipeToBookmarks();
+    addRecipeToBookmarks(state.recipe);
+
+    BookmarkView.fillBookmarkButton();
+
+    BookmarkView.removeMessage();
+  } else {
+    BookmarkView.deleteRecipeHTMLFromBookmarks(state.recipe);
+
+    deleteRecipeFromBookmarks(state.recipe);
+
+    BookmarkView.unfillBookmarkButton();
+  }
+  if (state.bookmarks.length === 0) {
+    BookmarkView.renderMessage();
+  }
 };
 
-const handleDeleteBookmarkView = () => {
-  BookmarkView.bookmarkViewMessageToggler();
+BookmarkView.addBookmarkEventListener(handleBookmarkView);
 
-  BookmarkView.unfillBookmarkIcon(icons);
-
-  deleteRecipeFromBookmarks();
-};
-
-const callBookmarkEventHandler = () => {
-  BookmarkView.handleBookmarkEvent(
-    handleAddBookmarkView,
-    handleDeleteBookmarkView
+const renderBookmarksOnLoadEvent = () => {
+  if (state.bookmarks.length === 0) {
+    BookmarkView.renderMessage();
+  }
+  state.bookmarks.map(bookmarkedRecipe =>
+    BookmarkView.render(bookmarkedRecipe)
   );
 };
+
+BookmarkView.addLoadEventListenerForBookmarkMessage(renderBookmarksOnLoadEvent);
 
 // ------------------------------------------------------------------------------------------------------
 
-const initLoadAndRenderRecipe = async () => {
-  // RecipeView.showSpinner(true);
-  const recipeId = getRecipeIdFromUrl();
-  const recipe = await getRecipeData(recipeId);
-  recipeCurrent = recipe;
-};
+// document.querySelector('.bookmarks').addEventListener('click', function (e) {
+//   if (e.target.closest('.preview')) {
+//     e.target
+//       .closest('.bookmarks')
+//       .querySelectorAll('.preview__link')
+//       .forEach(link => link.classList.remove('preview__link--active'));
+//     const link = e.target.closest('.preview').querySelector('.preview__link');
+//     window.location.hash = link.getAttribute('href');
+//     link.classList.add('preview__link--active');
+//     loadAndRenderRecipe();
+//   }
+// });
 
-const checkIfRecipeIsBookmarked = recipe => {
-  const BookmarkedLoadedRecipe = bookmarkedRecipes.find(
-    currentRecipe => recipe.id === currentRecipe.id
-  );
-  if (BookmarkedLoadedRecipe) {
-    BookmarkedLoadedRecipe.bookmarked = true;
-    // RecipeView.renderRecipeView(BookmarkedLoadedRecipe);
-    recipeCurrent = BookmarkedLoadedRecipe;
-  } else {
-    // recipeCurrent.bookmarked = false;
-    RecipeView.renderRecipeView(recipe);
-  }
+// const btnPreviousPage = document.querySelector('.pagination__btn--prev');
+// const btnNextPage = document.querySelector('.pagination__btn--next');
 
-  if (recipe.bookmarked || BookmarkedLoadedRecipe) {
-    BookmarkView.fillBookmarkIcon(icons);
-  }
-};
+// btnPreviousPage.addEventListener('click', function (e) {
+//   e.preventDefault();
+//   let pageNumber = e.target.closest('button').dataset.pageNumber;
+//   console.log(`page ${pageNumber}`);
+//   e.target.closest('button').dataset.pageNumber--;
+// });
 
-const listenForBookmarkButtonClick = () => {
-  BookmarkView.bookmarkListener(icons, recipeCurrent, bookmarkedRecipes);
-};
-
-const loadAndRenderRecipe = function () {
-  initLoadAndRenderRecipe();
-  checkIfRecipeIsBookmarked(recipeCurrent);
-  listenForBookmarkButtonClick();
-};
-
-// window.addEventListener('load', loadAndRenderRecipe);
-// window.addEventListener('hashchange', loadAndRenderRecipe);
-
-recipeSearchResults.addEventListener('click', function (e) {
-  if (e.target.closest('.preview')) {
-    e.target
-      .closest('.search-results')
-      .querySelectorAll('.preview__link')
-      .forEach(link => link.classList.remove('preview__link--active'));
-    const link = e.target.closest('.preview').querySelector('.preview__link');
-    window.location.hash = link.getAttribute('href');
-    link.classList.add('preview__link--active');
-    loadAndRenderRecipe();
-  }
-});
-
-//todo: extract into function with meaningful name
-document.querySelector('.bookmarks').addEventListener('click', function (e) {
-  if (e.target.closest('.preview')) {
-    e.target
-      .closest('.bookmarks')
-      .querySelectorAll('.preview__link')
-      .forEach(link => link.classList.remove('preview__link--active'));
-    const link = e.target.closest('.preview').querySelector('.preview__link');
-    window.location.hash = link.getAttribute('href');
-    link.classList.add('preview__link--active');
-    loadAndRenderRecipe();
-  }
-});
-
-// document
-//   .querySelector('.search')
-//   .addEventListener('submit', async function (e) {
-//     e.preventDefault();
-//     if (!document.querySelector('.search__field').value) return;
-
-//     recipeSearchResults.textContent = '';
-
-//     recipeSearchResults.insertAdjacentHTML(
-//       'afterbegin',
-//       `
-//       <div class="spinner">
-//         <svg>
-//           <use href="${icons}#icon-loader"></use>
-//         </svg>
-//       </div>`
-//     );
-
-//     const searchedArr = await Model.getRecipesFromSearch();
-//     console.log(searchedArr);
-//     searchedArr.forEach(rec => SearchView.renderSearchView(rec));
-//   });
-
-const btnPreviousPage = document.querySelector('.pagination__btn--prev');
-const btnNextPage = document.querySelector('.pagination__btn--next');
-
-btnPreviousPage.addEventListener('click', function (e) {
-  e.preventDefault();
-  let pageNumber = e.target.closest('button').dataset.pageNumber;
-  console.log(`page ${pageNumber}`);
-  e.target.closest('button').dataset.pageNumber--;
-});
-
-btnNextPage.addEventListener('click', function (e) {
-  e.preventDefault();
-  let pageNumber = e.target.closest('button').dataset.pageNumber;
-  console.log(`page ${pageNumber}`);
-  e.target.closest('button').dataset.pageNumber++;
-});
-
-const getLocalStorage = () => {
-  bookmarkedRecipes =
-    JSON.parse(localStorage.getItem('bookmarkedRecipes')) || [];
-
-  if (!bookmarkedRecipes) return;
-  bookmarkedRecipes.forEach(recipe => {
-    recipe.bookmarked = true;
-    BookmarkView.addRecipeToBookmarks(recipe);
-    delMessage();
-  });
-};
-
-getLocalStorage();
+// btnNextPage.addEventListener('click', function (e) {
+//   e.preventDefault();
+//   let pageNumber = e.target.closest('button').dataset.pageNumber;
+//   console.log(`page ${pageNumber}`);
+//   e.target.closest('button').dataset.pageNumber++;
+// });

@@ -15,7 +15,7 @@ class SearchView extends View {
         <li class="preview">
         <a class="preview__link" href="#${recipe.id}">
           <figure class="preview__fig">
-            <img src="${recipe.image_url}" alt="Test" />
+            <img src="${recipe.imageUrl}" alt="${recipe.title}" />
           </figure>
           <div class="preview__data">
             <h4 class="preview__title">${recipe.title}</h4>
@@ -28,13 +28,10 @@ class SearchView extends View {
   }
 
   addSubmitListener(handlerFunction) {
-    document
-      .querySelector('.search')
-      .querySelector('.search__field')
-      .addEventListener('submit', function (e) {
-        e.preventDefault();
-        handlerFunction();
-      });
+    document.querySelector('.search').addEventListener('submit', function (e) {
+      e.preventDefault();
+      handlerFunction();
+    });
   }
 }
 

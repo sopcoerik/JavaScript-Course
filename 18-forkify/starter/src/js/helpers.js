@@ -5,15 +5,3 @@ const timeout = function (s) {
     }, s * 1000);
   });
 };
-
-const showSpinner = (parentElementClass, state) => {
-  const spinner = document
-    .querySelector(parentElementClass)
-    .querySelector('.spinner');
-
-  state ? spinner.classList.remove('hidden') : spinner.classList.add('hidden');
-};
-
-const updateLocalStorage = bookmarkedRecipes => {
-  localStorage.setItem('bookmarkedRecipes', JSON.stringify(bookmarkedRecipes));
-};

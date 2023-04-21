@@ -558,14 +558,35 @@ function hmrAccept(bundle, id) {
 
 },{}],"aenu9":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-var _esRegexpFlagsJs = require("core-js/modules/es.regexp.flags.js");
+var _esRegexpFlagsJs = require("core-js/modules/es.regexp.flags.js"); // ------------------------------------------------------------------------------------------------------
+ // document.querySelector('.bookmarks').addEventListener('click', function (e) {
+ //   if (e.target.closest('.preview')) {
+ //     e.target
+ //       .closest('.bookmarks')
+ //       .querySelectorAll('.preview__link')
+ //       .forEach(link => link.classList.remove('preview__link--active'));
+ //     const link = e.target.closest('.preview').querySelector('.preview__link');
+ //     window.location.hash = link.getAttribute('href');
+ //     link.classList.add('preview__link--active');
+ //     loadAndRenderRecipe();
+ //   }
+ // });
+ // const btnPreviousPage = document.querySelector('.pagination__btn--prev');
+ // const btnNextPage = document.querySelector('.pagination__btn--next');
+ // btnPreviousPage.addEventListener('click', function (e) {
+ //   e.preventDefault();
+ //   let pageNumber = e.target.closest('button').dataset.pageNumber;
+ //   console.log(`page ${pageNumber}`);
+ //   e.target.closest('button').dataset.pageNumber--;
+ // });
+ // btnNextPage.addEventListener('click', function (e) {
+ //   e.preventDefault();
+ //   let pageNumber = e.target.closest('button').dataset.pageNumber;
+ //   console.log(`page ${pageNumber}`);
+ //   e.target.closest('button').dataset.pageNumber++;
+ // });
 var _webImmediateJs = require("core-js/modules/web.immediate.js");
 var _regeneratorRuntime = require("regenerator-runtime");
-var _fracty = require("fracty");
-var _fractyDefault = parcelHelpers.interopDefault(_fracty);
-var _iconsSvg = require("url:../img/icons.svg");
-var _iconsSvgDefault = parcelHelpers.interopDefault(_iconsSvg);
-var _helpers = require("./helpers");
 var _model = require("./model");
 var _recipeView = require("./views/recipeView");
 var _recipeViewDefault = parcelHelpers.interopDefault(_recipeView);
@@ -573,17 +594,11 @@ var _searchView = require("./views/searchView");
 var _searchViewDefault = parcelHelpers.interopDefault(_searchView);
 var _bookmarkView = require("./views/bookmarkView");
 var _bookmarkViewDefault = parcelHelpers.interopDefault(_bookmarkView);
-var _paginationView = require("./views/paginationView");
-var _paginationViewDefault = parcelHelpers.interopDefault(_paginationView);
-const recipeContainer = document.querySelector(".recipe");
-const recipeSearchResults = document.querySelector(".results");
+var _servingsView = require("./views/servingsView");
+var _servingsViewDefault = parcelHelpers.interopDefault(_servingsView);
 // https://forkify-api.herokuapp.com/v2
 // 5ed6604591c37cdc054bcd09
 ///////////////////////////////////////
-let bookmarkedRecipes = [];
-let recipeCurrent;
-(0, _paginationViewDefault.default).addPrevButton();
-(0, _paginationViewDefault.default).addNextButton();
 // -------------------------------------------------------------------------------------------------------
 // ---------------------Getting Recipes From URL
 const getRecipeIdFromUrl = ()=>{
@@ -594,127 +609,51 @@ const getRecipeIdFromUrl = ()=>{
 };
 // ---------------------Handling Search View
 const handleSearchView = async ()=>{
+    (0, _searchViewDefault.default).renderSpinner();
     const query = (0, _searchViewDefault.default).getSearchQuery();
     await (0, _model.getRecipesFromSearch)(query);
     (0, _searchViewDefault.default).render((0, _model.state).search.results);
 };
-(0, _searchViewDefault.default).handleSubmitEvent(handleSearchView);
+(0, _searchViewDefault.default).addSubmitListener(handleSearchView);
 // --------------------Handling Recipe View
 const handleRecipeView = async ()=>{
     if (window.location.hash) {
+        (0, _recipeViewDefault.default).renderSpinner();
         const recipeId = getRecipeIdFromUrl();
         await (0, _model.getRecipeData)(recipeId);
         (0, _recipeViewDefault.default).render((0, _model.state).recipe);
-        callBookmarkEventHandler();
+        (0, _model.state).bookmarks.forEach((bookmarkedRecipe)=>{
+            if ((0, _model.state).recipe.id === bookmarkedRecipe.id) {
+                (0, _model.state).recipe.bookmarked = true;
+                (0, _bookmarkViewDefault.default).fillBookmarkButton();
+            }
+        });
     }
 };
-(0, _recipeViewDefault.default).handleRecipeRenderEvents(handleRecipeView);
+(0, _recipeViewDefault.default).addRecipeRenderEventListener(handleRecipeView);
 // -------------------Handling Bookmark View
-const handleAddBookmarkView = ()=>{
-    (0, _bookmarkViewDefault.default).bookmarkViewMessageToggler();
-    (0, _bookmarkViewDefault.default).fillBookmarkIcon((0, _iconsSvgDefault.default));
-    (0, _bookmarkViewDefault.default).render((0, _model.state).recipe);
-    (0, _model.addRecipeToBookmarks)();
-};
-const handleDeleteBookmarkView = ()=>{
-    (0, _bookmarkViewDefault.default).bookmarkViewMessageToggler();
-    (0, _bookmarkViewDefault.default).unfillBookmarkIcon((0, _iconsSvgDefault.default));
-    (0, _model.deleteRecipeFromBookmarks)();
-};
-const callBookmarkEventHandler = ()=>{
-    (0, _bookmarkViewDefault.default).handleBookmarkEvent(handleAddBookmarkView, handleDeleteBookmarkView);
-};
-// ------------------------------------------------------------------------------------------------------
-const initLoadAndRenderRecipe = async ()=>{
-    // RecipeView.showSpinner(true);
-    const recipeId = getRecipeIdFromUrl();
-    const recipe = await (0, _model.getRecipeData)(recipeId);
-    recipeCurrent = recipe;
-};
-const checkIfRecipeIsBookmarked = (recipe)=>{
-    const BookmarkedLoadedRecipe = bookmarkedRecipes.find((currentRecipe)=>recipe.id === currentRecipe.id);
-    if (BookmarkedLoadedRecipe) {
-        BookmarkedLoadedRecipe.bookmarked = true;
-        // RecipeView.renderRecipeView(BookmarkedLoadedRecipe);
-        recipeCurrent = BookmarkedLoadedRecipe;
-    } else // recipeCurrent.bookmarked = false;
-    (0, _recipeViewDefault.default).renderRecipeView(recipe);
-    if (recipe.bookmarked || BookmarkedLoadedRecipe) (0, _bookmarkViewDefault.default).fillBookmarkIcon((0, _iconsSvgDefault.default));
-};
-const listenForBookmarkButtonClick = ()=>{
-    (0, _bookmarkViewDefault.default).bookmarkListener((0, _iconsSvgDefault.default), recipeCurrent, bookmarkedRecipes);
-};
-const loadAndRenderRecipe = function() {
-    initLoadAndRenderRecipe();
-    checkIfRecipeIsBookmarked(recipeCurrent);
-    listenForBookmarkButtonClick();
-};
-// window.addEventListener('load', loadAndRenderRecipe);
-// window.addEventListener('hashchange', loadAndRenderRecipe);
-recipeSearchResults.addEventListener("click", function(e) {
-    if (e.target.closest(".preview")) {
-        e.target.closest(".search-results").querySelectorAll(".preview__link").forEach((link)=>link.classList.remove("preview__link--active"));
-        const link = e.target.closest(".preview").querySelector(".preview__link");
-        window.location.hash = link.getAttribute("href");
-        link.classList.add("preview__link--active");
-        loadAndRenderRecipe();
+const handleBookmarkView = ()=>{
+    if (!(0, _model.state).recipe.bookmarked) {
+        (0, _bookmarkViewDefault.default).bookmarkViewMessageToggler();
+        (0, _bookmarkViewDefault.default).render((0, _model.state).recipe);
+        (0, _model.addRecipeToBookmarks)((0, _model.state).recipe);
+        (0, _bookmarkViewDefault.default).fillBookmarkButton();
+        (0, _bookmarkViewDefault.default).removeMessage();
+    } else {
+        (0, _bookmarkViewDefault.default).deleteRecipeHTMLFromBookmarks((0, _model.state).recipe);
+        (0, _model.deleteRecipeFromBookmarks)((0, _model.state).recipe);
+        (0, _bookmarkViewDefault.default).unfillBookmarkButton();
     }
-});
-//todo: extract into function with meaningful name
-document.querySelector(".bookmarks").addEventListener("click", function(e) {
-    if (e.target.closest(".preview")) {
-        e.target.closest(".bookmarks").querySelectorAll(".preview__link").forEach((link)=>link.classList.remove("preview__link--active"));
-        const link = e.target.closest(".preview").querySelector(".preview__link");
-        window.location.hash = link.getAttribute("href");
-        link.classList.add("preview__link--active");
-        loadAndRenderRecipe();
-    }
-});
-// document
-//   .querySelector('.search')
-//   .addEventListener('submit', async function (e) {
-//     e.preventDefault();
-//     if (!document.querySelector('.search__field').value) return;
-//     recipeSearchResults.textContent = '';
-//     recipeSearchResults.insertAdjacentHTML(
-//       'afterbegin',
-//       `
-//       <div class="spinner">
-//         <svg>
-//           <use href="${icons}#icon-loader"></use>
-//         </svg>
-//       </div>`
-//     );
-//     const searchedArr = await Model.getRecipesFromSearch();
-//     console.log(searchedArr);
-//     searchedArr.forEach(rec => SearchView.renderSearchView(rec));
-//   });
-const btnPreviousPage = document.querySelector(".pagination__btn--prev");
-const btnNextPage = document.querySelector(".pagination__btn--next");
-btnPreviousPage.addEventListener("click", function(e) {
-    e.preventDefault();
-    let pageNumber = e.target.closest("button").dataset.pageNumber;
-    console.log(`page ${pageNumber}`);
-    e.target.closest("button").dataset.pageNumber--;
-});
-btnNextPage.addEventListener("click", function(e) {
-    e.preventDefault();
-    let pageNumber = e.target.closest("button").dataset.pageNumber;
-    console.log(`page ${pageNumber}`);
-    e.target.closest("button").dataset.pageNumber++;
-});
-const getLocalStorage = ()=>{
-    bookmarkedRecipes = JSON.parse(localStorage.getItem("bookmarkedRecipes")) || [];
-    if (!bookmarkedRecipes) return;
-    bookmarkedRecipes.forEach((recipe)=>{
-        recipe.bookmarked = true;
-        (0, _bookmarkViewDefault.default).addRecipeToBookmarks(recipe);
-        delMessage();
-    });
+    if ((0, _model.state).bookmarks.length === 0) (0, _bookmarkViewDefault.default).renderMessage();
 };
-getLocalStorage();
+(0, _bookmarkViewDefault.default).addBookmarkEventListener(handleBookmarkView);
+const renderBookmarksOnLoadEvent = ()=>{
+    if ((0, _model.state).bookmarks.length === 0) (0, _bookmarkViewDefault.default).renderMessage();
+    (0, _model.state).bookmarks.map((bookmarkedRecipe)=>(0, _bookmarkViewDefault.default).render(bookmarkedRecipe));
+};
+(0, _bookmarkViewDefault.default).addLoadEventListenerForBookmarkMessage(renderBookmarksOnLoadEvent);
 
-},{"core-js/modules/es.regexp.flags.js":"gSXXb","core-js/modules/web.immediate.js":"49tUX","regenerator-runtime":"dXNgZ","fracty":"hJO4d","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./model":"Y4A21","url:../img/icons.svg":"loVOp","./helpers":"hGI1E","./views/recipeView":"l60JC","./views/searchView":"9OQAM","./views/bookmarkView":"7YaI3","./views/paginationView":"6z7bi"}],"gSXXb":[function(require,module,exports) {
+},{"core-js/modules/es.regexp.flags.js":"gSXXb","core-js/modules/web.immediate.js":"49tUX","regenerator-runtime":"dXNgZ","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./model":"Y4A21","./views/recipeView":"l60JC","./views/searchView":"9OQAM","./views/bookmarkView":"7YaI3","./views/servingsView":"0343m"}],"gSXXb":[function(require,module,exports) {
 var global = require("76deb0be408cb4a9");
 var DESCRIPTORS = require("cb935020bf4b0c02");
 var defineBuiltInAccessor = require("ff1c3629469d584f");
@@ -2690,101 +2629,6 @@ try {
     else Function("r", "regeneratorRuntime = r")(runtime);
 }
 
-},{}],"hJO4d":[function(require,module,exports) {
-// FRACTY CONVERTS DECIMAL NUMBERS TO FRACTIONS BY ASSUMING THAT TRAILING PATTERNS FROM 10^-2 CONTINUE TO REPEAT
-// The assumption is based on the most standard numbering conventions
-// e.g. 3.51 will convert to 3 51/100 while 3.511 will convert to 3 23/45
-// Throw any number up to 16 digits long at fracty and let fracy do the work.
-// If number is beyond 16 digits fracty will truncate at 15 digits to compensate for roundoff errors created in IEEE 754 Floating Point conversion.
-module.exports = function(number) {
-    let type;
-    if (number < 0) {
-        number = Math.abs(number);
-        type = "-";
-    } else type = "";
-    if (number === undefined) return `Your input was undefined.`;
-    if (isNaN(number)) return `"${number}" is not a number.`;
-    if (number == 9999999999999999) return `${type}9999999999999999`;
-    if (number > 9999999999999999) return `Too many digits in your integer to maintain IEEE 754 Floating Point conversion accuracy.`;
-    if (Number.isInteger(number)) return `${type}${number}`;
-    if (number < .000001) return "0";
-    const numberString = number.toString();
-    const entry = numberString.split(".");
-    let integer = entry[0];
-    let decimal;
-    if (decimal == "0" && integer !== "0") return integer;
-    else if (decimal == "0" && integer == "0") return "0";
-    else if (numberString.length >= 17) decimal = entry[1].slice(0, entry[1].length - 1);
-    else decimal = entry[1];
-    if (decimal == "99" && integer !== "0") return `${integer} 99/100`;
-    else if (decimal == "99" && integer == "0") return `99/100`;
-    else if (1 - parseFloat(`.${decimal}`) < .0011) decimal = "999";
-    if (decimal == undefined) return integer;
-    const decimalRev = decimal.split("").reverse().join(""); //Reverse the string to look for patterns.
-    const patternSearch = /^(\d+)\1{1,2}/; //This greedy regex matches the biggest pattern that starts at the beginning of the string (at the end, in the case of the reversed string). A lazy regex doesn't work because it only identifies subpatterns in cases where subpatterns exist (e.g. '88' in '388388388388'), thus pattern capture must be greedy.
-    let pattern = decimalRev.match(patternSearch); //If there's a pattern, it's full sequence is in [0] of this array and the single unit is in [1] but it may still need to be reduced further.
-    if (pattern && decimal.length > 2) {
-        let patternSequence = pattern[0].split("").reverse().join("");
-        let endPattern = pattern[1].split("").reverse().join("");
-        if (endPattern.length > 1) {
-            let endPatternArray = endPattern.split("");
-            let testSingleUnit = 1;
-            for(let i = 0; i < endPatternArray.length; i++)testSingleUnit /= endPatternArray[0] / endPatternArray[i];
-            if (testSingleUnit === 1) endPattern = endPatternArray[0];
-        }
-        if (endPattern.length > 1 && endPattern.length % 2 === 0) endPattern = parseInt(endPattern.slice(0, endPattern.length / 2), 10) - parseInt(endPattern.slice(endPattern.length / 2, endPattern.length), 10) === 0 ? endPattern.slice(0, endPattern.length / 2) : endPattern;
-        return yesRepeat(decimal, endPattern, patternSequence, integer, type); //Begin calculating the numerator and denominator for decimals that have a pattern.
-    } else return noRepeat(decimal, integer, type); //Begin calculating the numerator and denominator for decimals that don't have a pattern.
-};
-//IF THERE'S A TRAILING PATTERN FRACTY DIVIDES THE INPUT BY ONE SUBTRACTED FROM THE NEAREST BASE 10 NUMBER WITH NUMBER OF ZEROS EQUAL TO THE LENGTH OF THE REPEATED PATTERN (I.E. A SERIES OF 9'S) MULTIPLIED BY THE BASE 10 NUMBER GREATER THAN AND CLOSEST TO THE INPUT.
-function yesRepeat(decimal, endPattern, patternSequence, integer, type) {
-    const rep = true; //The numerator repeats.
-    const nonPatternLength = decimal.length - patternSequence.length >= 1 ? decimal.length - patternSequence.length : 1; //Does the length of the non pattern segment of the input = 0? If it does, that's incorrect since we know it must equal at least 1, otherwise it's the length of the decimal input minus the length of the full pattern.
-    const decimalMultiplier2 = Math.pow(10, nonPatternLength); //Second multiplier to use.
-    const float = parseFloat(`0.${decimal}`); //Convert the decimal input to a floating point number.
-    const decimalMultiplier1 = Math.pow(10, endPattern.length); //Find the right multiplier to use for both numerator and denominator, which will later have 1 subtracted from it in the case of the denominator.
-    const numerator = Math.round((float * decimalMultiplier1 - float) * Math.pow(10, nonPatternLength)); //Find the numerator to be used in calculating the fraction that contains a repeating trailing sequence.
-    const denominator = (decimalMultiplier1 - 1) * decimalMultiplier2; //Caluculate the denominator using the equation for repeating trailing sequences.
-    return reduce(numerator, denominator, integer, type, rep); //Further reduce the numerator and denominator.
-}
-//IF THERE'S NO TRAILING PATTERN FRACTY DIVIDES THE INPUT BY THE NEAREST BASE 10 INTEGER GREATER THAN THE NUMERATOR.
-function noRepeat(decimal, integer, type) {
-    const rep = false; //The numerator doesn't repeat.
-    const numerator = parseInt(decimal, 10); //Numerator begins as decimal input converted into an integer.
-    const denominator = Math.pow(10, decimal.length); //Denominator begins as 10 to the power of the length of the numerator.
-    return reduce(numerator, denominator, integer, type, rep); //Reduce the numerator and denominator.
-}
-//FRACTY REDUCES THE FRACTION.
-function reduce(numerator, denominator, integer, type, rep) {
-    const primeNumberArray = [
-        2,
-        3,
-        5
-    ]; //If the numerator isn't from a repeating decimal case, the initialized array of prime numbers will suffice to find the common denominators.
-    if (rep === true) {
-        for(let i = 3; i * i <= numerator; i += 2)if (numerator % i === 0) primeNumberArray.push(i);
-    }
-    let j = 0; //Initialize counter over the prime number array for the while loop.
-    let comDenom = 1; //Initialize the common denominator.
-    let num = numerator; //Initialize the numerator.
-    let den = denominator; //Initialize the denominator.
-    while(j <= primeNumberArray.length)if (num % primeNumberArray[j] === 0 && den % primeNumberArray[j] === 0) {
-        comDenom = comDenom * primeNumberArray[j];
-        num = num / primeNumberArray[j];
-        den = den / primeNumberArray[j];
-    } else j++;
-    return returnStrings(den, num, integer, type);
-}
-//FRACTY RETURNS THE REDUCED FRACTION AS A STRING.
-function returnStrings(den, num, integer, type) {
-    if (den === 1 && num === 1) {
-        integer = `${type}${(parseInt(integer) + 1).toString()}`; //Add 1 to the integer and return a string without a fraction.
-        return `${integer}`;
-    } else if (num === 0) return `${type}${integer}`;
-    else if (integer == "0") return `${type}${num}/${den}`;
-    else return `${type}${integer} ${num}/${den}`; //If there's an integer and a fraction return both.
-}
-
 },{}],"gkKU3":[function(require,module,exports) {
 exports.interopDefault = function(a) {
     return a && a.__esModule ? a : {
@@ -2840,7 +2684,7 @@ const getRecipeData = async function(recipeId) {
         let { recipe  } = data.data;
         state.recipe = {
             cookingTime: recipe.cooking_time,
-            recipeId: recipe.recipeId,
+            recipeId: recipe.id,
             imageUrl: recipe.image_url,
             ingredients: recipe.ingredients,
             publisher: recipe.publisher,
@@ -2877,11 +2721,12 @@ const updateRecipeServings = (newServings)=>{
     });
 };
 const addRecipeToBookmarks = (recipe)=>{
-    state.recipe.bookmarked = true;
+    recipe.bookmarked = true;
     state.bookmarks.push(recipe);
     localStorage.setItem("bookmarkedRecipes", JSON.stringify(state.bookmarks));
 };
 const deleteRecipeFromBookmarks = (recipe)=>{
+    recipe.bookmarked = false;
     const recipeIndex = state.bookmarks.findIndex((recipeCurr)=>recipe.id === recipeCurr.id);
     state.bookmarks.splice(recipeIndex, 1);
     localStorage.setItem("bookmarkedRecipes", JSON.stringify(state.bookmarks));
@@ -2891,64 +2736,11 @@ const initBookmarkedRecipes = ()=>{
     return bookmarkedRecipes;
 };
 const init = ()=>{
-    initBookmarkedRecipes();
+    state.bookmarks = initBookmarkedRecipes();
 };
 init();
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"loVOp":[function(require,module,exports) {
-module.exports = require("1bd8c20348739454").getBundleURL("hWUTQ") + "icons.dfd7a6db.svg" + "?" + Date.now();
-
-},{"1bd8c20348739454":"lgJ39"}],"lgJ39":[function(require,module,exports) {
-"use strict";
-var bundleURL = {};
-function getBundleURLCached(id) {
-    var value = bundleURL[id];
-    if (!value) {
-        value = getBundleURL();
-        bundleURL[id] = value;
-    }
-    return value;
-}
-function getBundleURL() {
-    try {
-        throw new Error();
-    } catch (err) {
-        var matches = ("" + err.stack).match(/(https?|file|ftp|(chrome|moz|safari-web)-extension):\/\/[^)\n]+/g);
-        if (matches) // The first two stack frames will be this function and getBundleURLCached.
-        // Use the 3rd one, which will be a runtime in the original bundle.
-        return getBaseURL(matches[2]);
-    }
-    return "/";
-}
-function getBaseURL(url) {
-    return ("" + url).replace(/^((?:https?|file|ftp|(chrome|moz|safari-web)-extension):\/\/.+)\/[^/]+$/, "$1") + "/";
-} // TODO: Replace uses with `new URL(url).origin` when ie11 is no longer supported.
-function getOrigin(url) {
-    var matches = ("" + url).match(/(https?|file|ftp|(chrome|moz|safari-web)-extension):\/\/[^/]+/);
-    if (!matches) throw new Error("Origin not found");
-    return matches[0];
-}
-exports.getBundleURL = getBundleURLCached;
-exports.getBaseURL = getBaseURL;
-exports.getOrigin = getOrigin;
-
-},{}],"hGI1E":[function(require,module,exports) {
-const timeout = function(s) {
-    return new Promise(function(_, reject) {
-        setTimeout(function() {
-            reject(new Error(`Request took too long! Timeout after ${s} second`));
-        }, s * 1000);
-    });
-};
-const showSpinner = (parentElementClass, state)=>{
-    const spinner = document.querySelector(parentElementClass).querySelector(".spinner");
-    state ? spinner.classList.remove("hidden") : spinner.classList.add("hidden");
-};
-const updateLocalStorage = (bookmarkedRecipes)=>{
-    localStorage.setItem("bookmarkedRecipes", JSON.stringify(bookmarkedRecipes));
-};
-
-},{}],"l60JC":[function(require,module,exports) {
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"l60JC":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 var _iconsSvg = require("url:../../img/icons.svg");
@@ -3050,7 +2842,7 @@ class RecipeView extends (0, _viewJsDefault.default) {
     </div>
     `;
     };
-    handleRecipeRenderEvents(handlerFunction) {
+    addRecipeRenderEventListener(handlerFunction) {
         [
             "hashchange",
             "load"
@@ -3061,68 +2853,225 @@ class RecipeView extends (0, _viewJsDefault.default) {
     }
     // todo: implement and use
     renderIngredient(ingredient) {}
-    // renderSpinner() {
-    //   this._parentElement.innerHTML = '';
-    //   this._parentElement.insertAdjacentHTML(
-    //     'afterbegin',
-    //     `<div class="spinner hidden">
-    //       <svg>
-    //         <use href="${icons}#icon-loader"></use>
-    //       </svg>
-    //     </div>`
-    //   );
-    //   this._parentElement.insertAdjacentHTML('afterbegin', html);
-    // }
-    decreaseServings(currentRecipe) {
-        const servings = document.querySelector(".recipe__info-data--people");
-        if (servings.innerHTML <= 1) servings.innerHTML = 1;
-        else servings.innerHTML--;
-        const newServingsQuantity = servings.innerHTML;
-        // go over each recipe ingredient ( from js structure )
-        currentRecipe.ingredients.forEach((ingredient)=>{
-            // calculate the new ingredient quantity based on the new servings, starting from the data you have in the recipe data
-            // get quantity necessary for serving
-            const quantityPerServing = ingredient.quantity / currentRecipe.servings;
-            const newIngredientQuantity = (quantityPerServing * newServingsQuantity).toFixed(1);
-            // find the appropriate html element for current ingredient in the loop
-            // ingredient.description
-            const ingredientElements = document.querySelectorAll(".recipe__ingredient");
-            const ingredientElement = Array.from(ingredientElements).find((iE)=>iE.querySelector(".recipe__description").innerHTML === ingredient.description);
-            const ingredientQuantityElement = ingredientElement.querySelector(".recipe__quantity");
-            if (!ingredientQuantityElement.innerHTML) return;
-            ingredientQuantityElement.innerHTML = (0, _fractyDefault.default)(newIngredientQuantity);
-        });
-    }
-    increaseServings(currentRecipe) {
-        const servings = document.querySelector(".recipe__info-data--people");
-        servings.innerHTML++;
-        const newServingsQuantity = servings.innerHTML;
-        // go over each recipe ingredient ( from js structure )
-        currentRecipe.ingredients.forEach((ingredient)=>{
-            // calculate the new ingredient quantity based on the new servings, starting from the data you have in the recipe data
-            // get quantity necessary for serving
-            const quantityPerServing = ingredient.quantity / currentRecipe.servings;
-            const newIngredientQuantity = (quantityPerServing * newServingsQuantity).toFixed(1);
-            // find the appropriate html element for current ingredient in the loop
-            // ingredient.description
-            const ingredientElements = document.querySelectorAll(".recipe__ingredient");
-            const ingredientElement = Array.from(ingredientElements).find((iE)=>iE.querySelector(".recipe__description").innerHTML === ingredient.description);
-            const ingredientQuantityElement = ingredientElement.querySelector(".recipe__quantity");
-            if (!ingredientQuantityElement.innerHTML) return;
-            ingredientQuantityElement.innerHTML = (0, _fractyDefault.default)(newIngredientQuantity);
-        });
-    }
-    // showSpinner(state) {
-    //   showSpinner('.recipe', state);
-    // }
-    servingsChangeListener() {
-        document.querySelector(".btn--increase-servings").addEventListener("click", ()=>increaseServings(recipe));
-        document.querySelector(".btn--decrease-servings").addEventListener("click", ()=>decreaseServings(recipe));
-    }
 }
+// renderSpinner() {
+//   this._parentElement.innerHTML = '';
+//   this._parentElement.insertAdjacentHTML(
+//     'afterbegin',
+//     `<div class="spinner hidden">
+//       <svg>
+//         <use href="${icons}#icon-loader"></use>
+//       </svg>
+//     </div>`
+//   );
+//   this._parentElement.insertAdjacentHTML('afterbegin', html);
+// }
+//   decreaseServings(currentRecipe) {
+//     const servings = document.querySelector('.recipe__info-data--people');
+//     if (servings.innerHTML <= 1) servings.innerHTML = 1;
+//     else servings.innerHTML--;
+//     const newServingsQuantity = servings.innerHTML;
+//     // go over each recipe ingredient ( from js structure )
+//     currentRecipe.ingredients.forEach(ingredient => {
+//       // calculate the new ingredient quantity based on the new servings, starting from the data you have in the recipe data
+//       // get quantity necessary for serving
+//       const quantityPerServing = ingredient.quantity / currentRecipe.servings;
+//       const newIngredientQuantity = (
+//         quantityPerServing * newServingsQuantity
+//       ).toFixed(1);
+//       // find the appropriate html element for current ingredient in the loop
+//       // ingredient.description
+//       const ingredientElements = document.querySelectorAll(
+//         '.recipe__ingredient'
+//       );
+//       const ingredientElement = Array.from(ingredientElements).find(
+//         iE =>
+//           iE.querySelector('.recipe__description').innerHTML ===
+//           ingredient.description
+//       );
+//       const ingredientQuantityElement =
+//         ingredientElement.querySelector('.recipe__quantity');
+//       if (!ingredientQuantityElement.innerHTML) return;
+//       ingredientQuantityElement.innerHTML = fracty(newIngredientQuantity);
+//     });
+//   }
+//   // todo: use the data from model instead of doing the calculations here
+//   // handler will be in controller. it will call model functions to update servings. then it will update the view. (view.update function?)
+//   increaseServings(currentRecipe) {
+//     const servings = document.querySelector('.recipe__info-data--people');
+//     servings.innerHTML++;
+//     const newServingsQuantity = servings.innerHTML;
+//     // go over each recipe ingredient ( from js structure )
+//     currentRecipe.ingredients.forEach(ingredient => {
+//       // calculate the new ingredient quantity based on the new servings, starting from the data you have in the recipe data
+//       // get quantity necessary for serving
+//       const quantityPerServing = ingredient.quantity / currentRecipe.servings;
+//       const newIngredientQuantity = (
+//         quantityPerServing * newServingsQuantity
+//       ).toFixed(1);
+//       // find the appropriate html element for current ingredient in the loop
+//       // ingredient.description
+//       const ingredientElements = document.querySelectorAll(
+//         '.recipe__ingredient'
+//       );
+//       const ingredientElement = Array.from(ingredientElements).find(
+//         iE =>
+//           iE.querySelector('.recipe__description').innerHTML ===
+//           ingredient.description
+//       );
+//       const ingredientQuantityElement =
+//         ingredientElement.querySelector('.recipe__quantity');
+//       if (!ingredientQuantityElement.innerHTML) return;
+//       ingredientQuantityElement.innerHTML = fracty(newIngredientQuantity);
+//     });
+//   }
+//   // showSpinner(state) {
+//   //   showSpinner('.recipe', state);
+//   // }
+//   servingsChangeListener() {
+//     document
+//       .querySelector('.btn--increase-servings')
+//       .addEventListener('click', () => increaseServings(recipe));
+//     document
+//       .querySelector('.btn--decrease-servings')
+//       .addEventListener('click', () => decreaseServings(recipe));
+//   }
+// }
 exports.default = new RecipeView();
 
-},{"url:../../img/icons.svg":"loVOp","../../../node_modules/fracty":"hJO4d","./View.js":"5cUXS","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"5cUXS":[function(require,module,exports) {
+},{"url:../../img/icons.svg":"loVOp","../../../node_modules/fracty":"hJO4d","./View.js":"5cUXS","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"loVOp":[function(require,module,exports) {
+module.exports = require("1bd8c20348739454").getBundleURL("hWUTQ") + "icons.dfd7a6db.svg" + "?" + Date.now();
+
+},{"1bd8c20348739454":"lgJ39"}],"lgJ39":[function(require,module,exports) {
+"use strict";
+var bundleURL = {};
+function getBundleURLCached(id) {
+    var value = bundleURL[id];
+    if (!value) {
+        value = getBundleURL();
+        bundleURL[id] = value;
+    }
+    return value;
+}
+function getBundleURL() {
+    try {
+        throw new Error();
+    } catch (err) {
+        var matches = ("" + err.stack).match(/(https?|file|ftp|(chrome|moz|safari-web)-extension):\/\/[^)\n]+/g);
+        if (matches) // The first two stack frames will be this function and getBundleURLCached.
+        // Use the 3rd one, which will be a runtime in the original bundle.
+        return getBaseURL(matches[2]);
+    }
+    return "/";
+}
+function getBaseURL(url) {
+    return ("" + url).replace(/^((?:https?|file|ftp|(chrome|moz|safari-web)-extension):\/\/.+)\/[^/]+$/, "$1") + "/";
+} // TODO: Replace uses with `new URL(url).origin` when ie11 is no longer supported.
+function getOrigin(url) {
+    var matches = ("" + url).match(/(https?|file|ftp|(chrome|moz|safari-web)-extension):\/\/[^/]+/);
+    if (!matches) throw new Error("Origin not found");
+    return matches[0];
+}
+exports.getBundleURL = getBundleURLCached;
+exports.getBaseURL = getBaseURL;
+exports.getOrigin = getOrigin;
+
+},{}],"hJO4d":[function(require,module,exports) {
+// FRACTY CONVERTS DECIMAL NUMBERS TO FRACTIONS BY ASSUMING THAT TRAILING PATTERNS FROM 10^-2 CONTINUE TO REPEAT
+// The assumption is based on the most standard numbering conventions
+// e.g. 3.51 will convert to 3 51/100 while 3.511 will convert to 3 23/45
+// Throw any number up to 16 digits long at fracty and let fracy do the work.
+// If number is beyond 16 digits fracty will truncate at 15 digits to compensate for roundoff errors created in IEEE 754 Floating Point conversion.
+module.exports = function(number) {
+    let type;
+    if (number < 0) {
+        number = Math.abs(number);
+        type = "-";
+    } else type = "";
+    if (number === undefined) return `Your input was undefined.`;
+    if (isNaN(number)) return `"${number}" is not a number.`;
+    if (number == 9999999999999999) return `${type}9999999999999999`;
+    if (number > 9999999999999999) return `Too many digits in your integer to maintain IEEE 754 Floating Point conversion accuracy.`;
+    if (Number.isInteger(number)) return `${type}${number}`;
+    if (number < .000001) return "0";
+    const numberString = number.toString();
+    const entry = numberString.split(".");
+    let integer = entry[0];
+    let decimal;
+    if (decimal == "0" && integer !== "0") return integer;
+    else if (decimal == "0" && integer == "0") return "0";
+    else if (numberString.length >= 17) decimal = entry[1].slice(0, entry[1].length - 1);
+    else decimal = entry[1];
+    if (decimal == "99" && integer !== "0") return `${integer} 99/100`;
+    else if (decimal == "99" && integer == "0") return `99/100`;
+    else if (1 - parseFloat(`.${decimal}`) < .0011) decimal = "999";
+    if (decimal == undefined) return integer;
+    const decimalRev = decimal.split("").reverse().join(""); //Reverse the string to look for patterns.
+    const patternSearch = /^(\d+)\1{1,2}/; //This greedy regex matches the biggest pattern that starts at the beginning of the string (at the end, in the case of the reversed string). A lazy regex doesn't work because it only identifies subpatterns in cases where subpatterns exist (e.g. '88' in '388388388388'), thus pattern capture must be greedy.
+    let pattern = decimalRev.match(patternSearch); //If there's a pattern, it's full sequence is in [0] of this array and the single unit is in [1] but it may still need to be reduced further.
+    if (pattern && decimal.length > 2) {
+        let patternSequence = pattern[0].split("").reverse().join("");
+        let endPattern = pattern[1].split("").reverse().join("");
+        if (endPattern.length > 1) {
+            let endPatternArray = endPattern.split("");
+            let testSingleUnit = 1;
+            for(let i = 0; i < endPatternArray.length; i++)testSingleUnit /= endPatternArray[0] / endPatternArray[i];
+            if (testSingleUnit === 1) endPattern = endPatternArray[0];
+        }
+        if (endPattern.length > 1 && endPattern.length % 2 === 0) endPattern = parseInt(endPattern.slice(0, endPattern.length / 2), 10) - parseInt(endPattern.slice(endPattern.length / 2, endPattern.length), 10) === 0 ? endPattern.slice(0, endPattern.length / 2) : endPattern;
+        return yesRepeat(decimal, endPattern, patternSequence, integer, type); //Begin calculating the numerator and denominator for decimals that have a pattern.
+    } else return noRepeat(decimal, integer, type); //Begin calculating the numerator and denominator for decimals that don't have a pattern.
+};
+//IF THERE'S A TRAILING PATTERN FRACTY DIVIDES THE INPUT BY ONE SUBTRACTED FROM THE NEAREST BASE 10 NUMBER WITH NUMBER OF ZEROS EQUAL TO THE LENGTH OF THE REPEATED PATTERN (I.E. A SERIES OF 9'S) MULTIPLIED BY THE BASE 10 NUMBER GREATER THAN AND CLOSEST TO THE INPUT.
+function yesRepeat(decimal, endPattern, patternSequence, integer, type) {
+    const rep = true; //The numerator repeats.
+    const nonPatternLength = decimal.length - patternSequence.length >= 1 ? decimal.length - patternSequence.length : 1; //Does the length of the non pattern segment of the input = 0? If it does, that's incorrect since we know it must equal at least 1, otherwise it's the length of the decimal input minus the length of the full pattern.
+    const decimalMultiplier2 = Math.pow(10, nonPatternLength); //Second multiplier to use.
+    const float = parseFloat(`0.${decimal}`); //Convert the decimal input to a floating point number.
+    const decimalMultiplier1 = Math.pow(10, endPattern.length); //Find the right multiplier to use for both numerator and denominator, which will later have 1 subtracted from it in the case of the denominator.
+    const numerator = Math.round((float * decimalMultiplier1 - float) * Math.pow(10, nonPatternLength)); //Find the numerator to be used in calculating the fraction that contains a repeating trailing sequence.
+    const denominator = (decimalMultiplier1 - 1) * decimalMultiplier2; //Caluculate the denominator using the equation for repeating trailing sequences.
+    return reduce(numerator, denominator, integer, type, rep); //Further reduce the numerator and denominator.
+}
+//IF THERE'S NO TRAILING PATTERN FRACTY DIVIDES THE INPUT BY THE NEAREST BASE 10 INTEGER GREATER THAN THE NUMERATOR.
+function noRepeat(decimal, integer, type) {
+    const rep = false; //The numerator doesn't repeat.
+    const numerator = parseInt(decimal, 10); //Numerator begins as decimal input converted into an integer.
+    const denominator = Math.pow(10, decimal.length); //Denominator begins as 10 to the power of the length of the numerator.
+    return reduce(numerator, denominator, integer, type, rep); //Reduce the numerator and denominator.
+}
+//FRACTY REDUCES THE FRACTION.
+function reduce(numerator, denominator, integer, type, rep) {
+    const primeNumberArray = [
+        2,
+        3,
+        5
+    ]; //If the numerator isn't from a repeating decimal case, the initialized array of prime numbers will suffice to find the common denominators.
+    if (rep === true) {
+        for(let i = 3; i * i <= numerator; i += 2)if (numerator % i === 0) primeNumberArray.push(i);
+    }
+    let j = 0; //Initialize counter over the prime number array for the while loop.
+    let comDenom = 1; //Initialize the common denominator.
+    let num = numerator; //Initialize the numerator.
+    let den = denominator; //Initialize the denominator.
+    while(j <= primeNumberArray.length)if (num % primeNumberArray[j] === 0 && den % primeNumberArray[j] === 0) {
+        comDenom = comDenom * primeNumberArray[j];
+        num = num / primeNumberArray[j];
+        den = den / primeNumberArray[j];
+    } else j++;
+    return returnStrings(den, num, integer, type);
+}
+//FRACTY RETURNS THE REDUCED FRACTION AS A STRING.
+function returnStrings(den, num, integer, type) {
+    if (den === 1 && num === 1) {
+        integer = `${type}${(parseInt(integer) + 1).toString()}`; //Add 1 to the integer and return a string without a fraction.
+        return `${integer}`;
+    } else if (num === 0) return `${type}${integer}`;
+    else if (integer == "0") return `${type}${num}/${den}`;
+    else return `${type}${integer} ${num}/${den}`; //If there's an integer and a fraction return both.
+}
+
+},{}],"5cUXS":[function(require,module,exports) {
 // implement default class view.
 // todo: look in the course how it was implemented and implement it.
 /*
@@ -3140,7 +3089,7 @@ class View {
     render(data) {
         if (!data || Array.isArray(data) && data.length === 0) return this.renderError();
         this._data = data;
-        const markup = _generateMarkup(); // this function is individual for every view
+        const markup = this._generateMarkup(); // this function is individual for every view
         this._clear();
         this._parentElement.insertAdjacentHTML("afterbegin", markup);
     }
@@ -3170,7 +3119,7 @@ class View {
     </div>
     `;
         this._clear();
-        this._parentElement.insertAdjacentHTML("beforebegin", spinner);
+        this._parentElement.insertAdjacentHTML("afterbegin", spinner);
     }
     renderError() {
         const errorMessage = `
@@ -3188,15 +3137,15 @@ class View {
     renderMessage() {
         const message = `
     <div class="message">
-    <div>
-      <svg>
-        <use href="${(0, _iconsSvgDefault.default)}#icon-smile"></use>
-      </svg>
+      <div>
+        <svg>
+          <use href="${(0, _iconsSvgDefault.default)}#icon-smile"></use>
+        </svg>
+      </div>
+      <p>
+        ${this._message}
+      </p>
     </div>
-    <p>
-      ${this._message};
-    </p>
-  </div>
     `;
         this._parentElement.insertAdjacentHTML("afterbegin", message);
     }
@@ -3220,7 +3169,7 @@ class SearchView extends (0, _viewJsDefault.default) {
         <li class="preview">
         <a class="preview__link" href="#${recipe.id}">
           <figure class="preview__fig">
-            <img src="${recipe.image_url}" alt="Test" />
+            <img src="${recipe.imageUrl}" alt="${recipe.title}" />
           </figure>
           <div class="preview__data">
             <h4 class="preview__title">${recipe.title}</h4>
@@ -3230,8 +3179,8 @@ class SearchView extends (0, _viewJsDefault.default) {
       </li>`;
         }).join("");
     }
-    handleSubmitEvent(handlerFunction) {
-        document.querySelector(".search").querySelector(".search__field").addEventListener("submit", function(e) {
+    addSubmitListener(handlerFunction) {
+        document.querySelector(".search").addEventListener("submit", function(e) {
             e.preventDefault();
             handlerFunction();
         });
@@ -3244,17 +3193,25 @@ var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 var _viewJs = require("./View.js");
 var _viewJsDefault = parcelHelpers.interopDefault(_viewJs);
+var _iconsSvg = require("url:../../img/icons.svg");
+var _iconsSvgDefault = parcelHelpers.interopDefault(_iconsSvg);
 class BookmarkView extends (0, _viewJsDefault.default) {
-    _bookmarkButton = document.querySelector(".btn--round");
     _parentElement = document.querySelector(".bookmarks__list");
-    _message = `No bookmarks yet. Find a nice recipe and bookmark it :)`;
+    _message = "No bookmarks yet. Find a nice recipe and bookmark it :)";
+    /* 
+    this._data structure:
+  */ render(data) {
+        if (!data || Array.isArray(data) && data.length === 0) return this.renderError();
+        this._data = data;
+        const markup = this._generateMarkup(); // this function is individual for every view
+        this._parentElement.insertAdjacentHTML("afterbegin", markup);
+    }
     bookmarkViewMessageToggler() {
         if (!this._parentElement.firstChild) this.renderMessage;
-        else this.delMessage();
     }
     _generateMarkup() {
         return `<li class="preview">
-      <a class="preview__link" href="#${this._data.id}">
+      <a class="preview__link" href="#${this._data.recipeId}">
         <figure class="preview__fig">
           <img src="${this._data.imageUrl}" alt="Test" />
         </figure>
@@ -3265,86 +3222,48 @@ class BookmarkView extends (0, _viewJsDefault.default) {
       </a>
     </li>`;
     }
-    handleBookmarkEvent(handlerFunctionAdd, handlerFunctionDelete) {
-        this._bookmarkButton.addEventListener("click", (e)=>{
+    addBookmarkEventListener(handlerFunction) {
+        document.querySelector(".recipe").addEventListener("click", (e)=>{
             e.preventDefault();
-            const attributeValueOfUse = this.bookmarkButton.querySelector("use").getAttribute("href").split("#");
-            console.log(attributeValueOfUse);
-            if (attributeValueOfUse[1] === "icon-bookmark-fill") handlerFunctionDelete();
-            else handlerFunctionAdd();
+            if (e.target.closest(".btn--round")) handlerFunction();
         });
     }
-    delRecipeFromBookmarks(recipe) {
-        const allBookmarkedRecipes = this._parentElement.querySelectorAll(".preview__link");
-        allBookmarkedRecipes.forEach((currRecipe)=>{
-            console.log(currRecipe);
-            const currRecipeId = currRecipe.getAttribute("href").split("#");
-            console.log(currRecipeId.splice(0, 1));
-            if (currRecipeId[0] === recipe.id) currRecipe.closest(".preview").remove();
+    fillBookmarkButton() {
+        document.querySelector(".recipe").querySelector(".btn--round").querySelector("use").setAttribute("href", `${(0, _iconsSvgDefault.default)}#icon-bookmark-fill`);
+    }
+    unfillBookmarkButton() {
+        document.querySelector(".recipe").querySelector(".btn--round").querySelector("use").setAttribute("href", `${(0, _iconsSvgDefault.default)}#icon-bookmark`);
+    }
+    deleteRecipeHTMLFromBookmarks() {
+        const allBookmarkedRecipes = Array.from(this._parentElement.querySelectorAll(".preview__link"));
+        allBookmarkedRecipes.forEach((recipePreview)=>{
+            if (recipePreview.hash === window.location.hash) recipePreview.closest(".preview").remove();
         });
     }
-    delMessage() {
-        document.querySelector(".message").style.display = "none";
+    addLoadEventListenerForBookmarkMessage(handlerFunction) {
+        window.addEventListener("load", handlerFunction);
     }
-    fillBookmarkIcon(icons) {
-        this._bookmarkButton.querySelector("use").setAttribute("href", `${icons}#icon-bookmark-fill`);
-    }
-    unfillBookmarkIcon(icons) {
-        this._bookmarkButton.querySelector("use").setAttribute("href", `${icons}#icon-bookmark`);
-    }
-    bookmarkListener(icons, recipe, bookmarkedRecipes) {
-        const bookmarkButton = document.querySelector(".btn--round");
-        bookmarkButton.addEventListener("click", function(e) {
-            e.preventDefault();
-            if (recipe.bookmarked) {
-                recipe.bookmarked = false;
-                unfillBookmarkIcon(icons, e);
-                const indexOfCurrentRecipe = bookmarkedRecipes.findIndex((curr)=>curr.id === recipe.id);
-                delRecipeFromBookmarks(recipe);
-                bookmarkedRecipes.splice(indexOfCurrentRecipe, 1);
-                updateLocalStorage(bookmarkedRecipes);
-                return bookmarkedRecipes;
-            } else {
-                fillBookmarkIcon(icons, e);
-                bookmarkedRecipes.push(recipe);
-                updateLocalStorage(bookmarkedRecipes);
-                addRecipeToBookmarks(recipe);
-                delMessage();
-                return bookmarkedRecipes;
-            }
-        });
+    removeMessage(parent) {
+        parent.querySelector(".message").remove();
     }
 }
 exports.default = new BookmarkView();
 
-},{"./View.js":"5cUXS","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"6z7bi":[function(require,module,exports) {
+},{"./View.js":"5cUXS","url:../../img/icons.svg":"loVOp","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"0343m":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
-var _iconsSvg = require("url:../../img/icons.svg");
-var _iconsSvgDefault = parcelHelpers.interopDefault(_iconsSvg);
-var _viewJs = require("./View.js");
-var _viewJsDefault = parcelHelpers.interopDefault(_viewJs);
-class PaginationView extends (0, _viewJsDefault.default) {
-    _parentElement = document.querySelector(".pagination");
-    addPrevButton() {
-        this._parentElement.insertAdjacentHTML("afterbegin", `<button class="btn--inline pagination__btn--prev" data-page-number="1">
-            <svg class="search__icon">
-                <use href="${(0, _iconsSvgDefault.default)}#icon-arrow-left"></use>
-            </svg>
-            <span>Page 1</span>
-        </button>`);
+class ServingsView {
+    increaseButton = document.querySelector(".btn--increase-servings");
+    decreaseButton = document.querySelector(".btn--decrease-servings");
+    addIncreaseEventListener(handlerFunction) {
+        this.increaseButton.addEventListener("click", handlerFunction);
     }
-    addNextButton() {
-        this._parentElement.insertAdjacentHTML("beforeend", `<button class="btn--inline pagination__btn--next" data-page-number="3">
-        <span>Page 3</span>
-        <svg class="search__icon">
-            <use href="${(0, _iconsSvgDefault.default)}#icon-arrow-right"></use>
-        </svg>
-    </button>`);
+    addDecreaseEventListener(handlerFunction) {
+        this.decreaseButton.addEventListener("click", handlerFunction);
     }
 }
-exports.default = new PaginationView();
+exports.default = new ServingsView();
 
-},{"url:../../img/icons.svg":"loVOp","./View.js":"5cUXS","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}]},["d8XZh","aenu9"], "aenu9", "parcelRequire3a11")
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}]},["d8XZh","aenu9"], "aenu9", "parcelRequire3a11")
 
 //# sourceMappingURL=index.e37f48ea.js.map

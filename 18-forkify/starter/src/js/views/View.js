@@ -18,8 +18,10 @@ export default class View {
 
     this._data = data;
 
-    const markup = _generateMarkup(); // this function is individual for every view
+    const markup = this._generateMarkup(); // this function is individual for every view
+
     this._clear();
+
     this._parentElement.insertAdjacentHTML('afterbegin', markup);
   }
 
@@ -69,9 +71,8 @@ export default class View {
         </svg>
     </div>
     `;
-
     this._clear();
-    this._parentElement.insertAdjacentHTML('beforebegin', spinner);
+    this._parentElement.insertAdjacentHTML('afterbegin', spinner);
   }
 
   renderError() {
@@ -92,15 +93,15 @@ export default class View {
   renderMessage() {
     const message = `
     <div class="message">
-    <div>
-      <svg>
-        <use href="${icons}#icon-smile"></use>
-      </svg>
+      <div>
+        <svg>
+          <use href="${icons}#icon-smile"></use>
+        </svg>
+      </div>
+      <p>
+        ${this._message}
+      </p>
     </div>
-    <p>
-      ${this._message};
-    </p>
-  </div>
     `;
 
     this._parentElement.insertAdjacentHTML('afterbegin', message);

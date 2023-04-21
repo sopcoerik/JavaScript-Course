@@ -20,7 +20,7 @@ export const getRecipeData = async function (recipeId) {
 
     state.recipe = {
       cookingTime: recipe.cooking_time,
-      recipeId: recipe.recipeId,
+      recipeId: recipe.id,
       imageUrl: recipe.image_url,
       ingredients: recipe.ingredients,
       publisher: recipe.publisher,
@@ -84,13 +84,15 @@ export const updateRecipeServings = newServings => {
 
 //addBookmark
 export const addRecipeToBookmarks = recipe => {
-  state.recipe.bookmarked = true;
+  recipe.bookmarked = true;
   state.bookmarks.push(recipe);
   localStorage.setItem('bookmarkedRecipes', JSON.stringify(state.bookmarks));
 };
 
 // deleteBookmark
 export const deleteRecipeFromBookmarks = recipe => {
+  recipe.bookmarked = false;
+
   const recipeIndex = state.bookmarks.findIndex(
     recipeCurr => recipe.id === recipeCurr.id
   );
@@ -103,12 +105,11 @@ export const initBookmarkedRecipes = () => {
   const bookmarkedRecipes = JSON.parse(
     localStorage.getItem('bookmarkedRecipes')
   );
-
   return bookmarkedRecipes;
 };
 
 const init = () => {
-  initBookmarkedRecipes();
+  state.bookmarks = initBookmarkedRecipes();
 };
 
 init();
