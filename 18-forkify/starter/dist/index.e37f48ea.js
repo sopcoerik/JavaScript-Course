@@ -584,20 +584,40 @@ let bookmarkedRecipes = [];
 let recipeCurrent;
 (0, _paginationViewDefault.default).addPrevButton();
 (0, _paginationViewDefault.default).addNextButton();
+// -------------------------------------------------------------------------------------------------------
+// ---------------------Getting Recipes From URL
 const getRecipeIdFromUrl = ()=>{
     let recipeId;
     if (window.location.hash) recipeId = window.location.hash;
     return recipeId;
 };
+// ---------------------Handling Search View
 const handleSearchView = async ()=>{
     const query = (0, _searchViewDefault.default).getSearchQuery();
     await (0, _model.getRecipesFromSearch)(query);
     (0, _searchViewDefault.default).render((0, _model.state).search.results);
 };
 (0, _searchViewDefault.default).handleSubmitEvent(handleSearchView);
-// TODO: move rendering logic to the view
-// TODO: extract business logic in functions with clear names
-// TODO: rendeRecipe is huge and contains code which it is not it's responsibility. Refactor.
+// --------------------Handling Recipe View
+const handleRecipeView = async ()=>{
+    await (0, _model.getRecipeData)(getRecipeIdFromUrl());
+    (0, _recipeViewDefault.default).render((0, _model.state).recipe);
+};
+(0, _recipeViewDefault.default).handleRecipeRenderEvents(handleRecipeView);
+// -------------------Handling Bookmark View
+const handleAddBookmarkView = ()=>{
+    (0, _bookmarkViewDefault.default).bookmarkViewMessageToggler();
+    (0, _bookmarkViewDefault.default).fillBookmarkIcon((0, _iconsSvgDefault.default));
+    (0, _bookmarkViewDefault.default).render((0, _model.state).recipe);
+    (0, _model.addRecipeToBookmarks)();
+};
+const handleDeleteBookmarkView = ()=>{
+    (0, _bookmarkViewDefault.default).bookmarkViewMessageToggler();
+    (0, _bookmarkViewDefault.default).unfillBookmarkIcon((0, _iconsSvgDefault.default));
+    (0, _model.deleteRecipeFromBookmarks)();
+};
+(0, _bookmarkViewDefault.default).handleBookmarkEvent(handleAddBookmarkView, handleDeleteBookmarkView);
+// ------------------------------------------------------------------------------------------------------
 const initLoadAndRenderRecipe = async ()=>{
     // RecipeView.showSpinner(true);
     const recipeId = getRecipeIdFromUrl();
@@ -622,8 +642,8 @@ const loadAndRenderRecipe = function() {
     checkIfRecipeIsBookmarked(recipeCurrent);
     listenForBookmarkButtonClick();
 };
-window.addEventListener("load", loadAndRenderRecipe);
-window.addEventListener("hashchange", loadAndRenderRecipe);
+// window.addEventListener('load', loadAndRenderRecipe);
+// window.addEventListener('hashchange', loadAndRenderRecipe);
 recipeSearchResults.addEventListener("click", function(e) {
     if (e.target.closest(".preview")) {
         e.target.closest(".search-results").querySelectorAll(".preview__link").forEach((link)=>link.classList.remove("preview__link--active"));
@@ -2924,42 +2944,44 @@ var _iconsSvg = require("url:../../img/icons.svg");
 var _iconsSvgDefault = parcelHelpers.interopDefault(_iconsSvg);
 var _fracty = require("../../../node_modules/fracty");
 var _fractyDefault = parcelHelpers.interopDefault(_fracty);
-class RecipeView {
+var _viewJs = require("./View.js");
+var _viewJsDefault = parcelHelpers.interopDefault(_viewJs);
+class RecipeView extends (0, _viewJsDefault.default) {
     // extends main View
     _parentElement = document.querySelector(".recipe");
-    renderRecipeView = function(recipe1) {
-        const html1 = `
+    _generateMarkup = function() {
+        return `
   <figure class="recipe__fig">
-    <img src="${recipe1.imageUrl}" alt="Tomato" class="recipe__img" />
+    <img src="${this._data.imageUrl}" alt="Tomato" class="recipe__img" />
     <h1 class="recipe__title">
-        <span>${recipe1.title}</span>
+        <span>${this._data.title}</span>
     </h1>
     </figure>
 
     <div class="recipe__details">
     <div class="recipe__info">
         <svg class="recipe__info-icon">
-        <use href="${(0, _iconsSvgDefault.default)}#icon-clock"></use>
+        <use href="${0, _iconsSvgDefault.default}#icon-clock"></use>
         </svg>
-        <span class="recipe__info-data recipe__info-data--minutes">${recipe1.cookingTime}</span>
+        <span class="recipe__info-data recipe__info-data--minutes">${this._data.cookingTime}</span>
         <span class="recipe__info-text">minutes</span>
     </div>
     <div class="recipe__info">
         <svg class="recipe__info-icon">
-        <use href="${(0, _iconsSvgDefault.default)}#icon-users"></use>
+        <use href="${0, _iconsSvgDefault.default}#icon-users"></use>
         </svg>
-        <span class="recipe__info-data recipe__info-data--people">${recipe1.servings}</span>
+        <span class="recipe__info-data recipe__info-data--people">${this._data.servings}</span>
         <span class="recipe__info-text">servings</span>
 
         <div class="recipe__info-buttons">
         <button class="btn--tiny btn--decrease-servings">
             <svg>
-            <use href="${(0, _iconsSvgDefault.default)}#icon-minus-circle"></use>
+            <use href="${0, _iconsSvgDefault.default}#icon-minus-circle"></use>
             </svg>
         </button>
         <button class="btn--tiny btn--increase-servings">
             <svg>
-            <use href="${(0, _iconsSvgDefault.default)}#icon-plus-circle"></use>
+            <use href="${0, _iconsSvgDefault.default}#icon-plus-circle"></use>
             </svg>
         </button>
         </div>
@@ -2967,12 +2989,12 @@ class RecipeView {
 
     <div class="recipe__user-generated hidden">
         <svg>
-        <use href="${(0, _iconsSvgDefault.default)}#icon-user"></use>
+        <use href="${0, _iconsSvgDefault.default}#icon-user"></use>
         </svg>
     </div>
     <button class="btn--round">
         <svg class="">
-        <use href="${(0, _iconsSvgDefault.default)}#icon-bookmark"></use>
+        <use href="${0, _iconsSvgDefault.default}#icon-bookmark"></use>
         </svg>
     </button>
     </div>
@@ -2982,7 +3004,7 @@ class RecipeView {
     <div class="recipe__ingredients">
         <h2 class="heading--2">Recipe ingredients</h2>
         <ul class="recipe__ingredient-list">
-        ${recipe1.ingredients.map((ing)=>{
+        ${this._data.ingredients.map((ing)=>{
             return `
             <li class="recipe__ingredient">
                 <svg class="recipe__icon">
@@ -3001,34 +3023,45 @@ class RecipeView {
         <h2 class="heading--2">How to cook it</h2>
         <p class="recipe__directions-text">
             This recipe was carefully designed and tested by
-            <span class="recipe__publisher">${recipe1.publisher}</span>. Please check out
+            <span class="recipe__publisher">${this._data.publisher}</span>. Please check out
             directions at their website.
         </p>
         <a
             class="btn--small recipe__btn"
-            href="${recipe1.sourceUrl}"
+            href="${this._data.sourceUrl}"
             target="_blank"
         >
             <span>Directions</span>
             <svg class="search__icon">
-            <use href="${(0, _iconsSvgDefault.default)}#icon-arrow-right"></use>
+            <use href="${0, _iconsSvgDefault.default}#icon-arrow-right"></use>
             </svg>
         </a>
     </div>
     `;
-        this.renderSpinner();
     };
+    handleRecipeRenderEvents(handlerFunction) {
+        [
+            "hashchange",
+            "load"
+        ].forEach((event)=>window.addEventListener(event, function(e) {
+                e.preventDefault();
+                handlerFunction();
+            }));
+    }
     // todo: implement and use
     renderIngredient(ingredient) {}
-    renderSpinner() {
-        this._parentElement.innerHTML = "";
-        this._parentElement.insertAdjacentHTML("afterbegin", `<div class="spinner hidden">
-        <svg>
-          <use href="${(0, _iconsSvgDefault.default)}#icon-loader"></use>
-        </svg>
-      </div>`);
-        this._parentElement.insertAdjacentHTML("afterbegin", html);
-    }
+    // renderSpinner() {
+    //   this._parentElement.innerHTML = '';
+    //   this._parentElement.insertAdjacentHTML(
+    //     'afterbegin',
+    //     `<div class="spinner hidden">
+    //       <svg>
+    //         <use href="${icons}#icon-loader"></use>
+    //       </svg>
+    //     </div>`
+    //   );
+    //   this._parentElement.insertAdjacentHTML('afterbegin', html);
+    // }
     decreaseServings(currentRecipe) {
         const servings = document.querySelector(".recipe__info-data--people");
         if (servings.innerHTML <= 1) servings.innerHTML = 1;
@@ -3078,40 +3111,7 @@ class RecipeView {
 }
 exports.default = new RecipeView();
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","url:../../img/icons.svg":"loVOp","../../../node_modules/fracty":"hJO4d"}],"9OQAM":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-var _viewJs = require("./View.js");
-var _viewJsDefault = parcelHelpers.interopDefault(_viewJs);
-class SearchView extends (0, _viewJsDefault.default) {
-    _parentElement = document.querySelector(".results");
-    _errorMessage = `No recipes found for your query. Please try again!`;
-    getSearchQuery = ()=>{
-        return document.querySelector(".search__field").value;
-    };
-    _generateMarkup() {
-        return this._data.map((recipe)=>{
-            return `
-        <li class="preview">
-        <a class="preview__link" href="#${recipe.id}">
-          <figure class="preview__fig">
-            <img src="${recipe.image_url}" alt="Test" />
-          </figure>
-          <div class="preview__data">
-            <h4 class="preview__title">${recipe.title}</h4>
-            <p class="preview__publisher">${recipe.publisher}</p>
-          </div>
-        </a>
-      </li>`;
-        }).join("");
-    }
-    handleSubmitEvent(handlerFunction) {
-        document.querySelector(".search").querySelector(".search__field").addEventListener("submit", handlerFunction);
-    }
-}
-exports.default = new SearchView();
-
-},{"./View.js":"5cUXS","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"5cUXS":[function(require,module,exports) {
+},{"url:../../img/icons.svg":"loVOp","../../../node_modules/fracty":"hJO4d","./View.js":"5cUXS","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"5cUXS":[function(require,module,exports) {
 // implement default class view.
 // todo: look in the course how it was implemented and implement it.
 /*
@@ -3142,7 +3142,7 @@ class View {
         newDOMElements.forEach((newEl, i)=>{
             const currEl = currentDOMElements[i];
             // Updates based on TEXT-CHANGE
-            if (!newEl.isEqualNode(currEl) && newEl.firstChild.nodeValue.trim() !== "") currEl.textContent = newEl.textContent;
+            if (!newEl.isEqualNode(currEl) && newEl.firstChild?.nodeValue.trim() !== "") currEl.textContent = newEl.textContent;
             if (!newEl.isEqualNode(currEl)) Array.from(newDOMElements.attributes).forEach(// here we can set the current elements attributes if they change
             (attribute)=>currEl.setAttributes(attribute.name, attribute.value));
         });
@@ -3192,28 +3192,79 @@ class View {
 }
 exports.default = View;
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","url:../../img/icons.svg":"loVOp"}],"7YaI3":[function(require,module,exports) {
+},{"url:../../img/icons.svg":"loVOp","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"9OQAM":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
-class BookmarkView {
-    #parentElement = document.querySelector(".bookmarks__list");
-    addRecipeToBookmarks(recipe) {
-        const html = `<li class="preview">
-      <a class="preview__link" href="#${recipe.id}">
+var _viewJs = require("./View.js");
+var _viewJsDefault = parcelHelpers.interopDefault(_viewJs);
+class SearchView extends (0, _viewJsDefault.default) {
+    _parentElement = document.querySelector(".results");
+    _errorMessage = `No recipes found for your query. Please try again!`;
+    getSearchQuery = ()=>{
+        return document.querySelector(".search__field").value;
+    };
+    _generateMarkup() {
+        return this._data.map((recipe)=>{
+            return `
+        <li class="preview">
+        <a class="preview__link" href="#${recipe.id}">
+          <figure class="preview__fig">
+            <img src="${recipe.image_url}" alt="Test" />
+          </figure>
+          <div class="preview__data">
+            <h4 class="preview__title">${recipe.title}</h4>
+            <p class="preview__publisher">${recipe.publisher}</p>
+          </div>
+        </a>
+      </li>`;
+        }).join("");
+    }
+    handleSubmitEvent(handlerFunction) {
+        document.querySelector(".search").querySelector(".search__field").addEventListener("submit", function(e) {
+            e.preventDefault();
+            handlerFunction();
+        });
+    }
+}
+exports.default = new SearchView();
+
+},{"./View.js":"5cUXS","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"7YaI3":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+var _viewJs = require("./View.js");
+var _viewJsDefault = parcelHelpers.interopDefault(_viewJs);
+class BookmarkView extends (0, _viewJsDefault.default) {
+    _bookmarkButton = document.querySelector(".btn--round");
+    _parentElement = document.querySelector(".bookmarks__list");
+    _message = `No bookmarks yet. Find a nice recipe and bookmark it :)`;
+    bookmarkViewMessageToggler() {
+        if (!this._parentElement.firstChild) this.renderMessage;
+        else this.delMessage();
+    }
+    _generateMarkup() {
+        return `<li class="preview">
+      <a class="preview__link" href="#${this._data.id}">
         <figure class="preview__fig">
-          <img src="${recipe.image_url}" alt="Test" />
+          <img src="${this._data.imageUrl}" alt="Test" />
         </figure>
         <div class="preview__data">
-          <h4 class="preview__name">${recipe.title}</h4>
-          <p class="preview__publisher">${recipe.publisher}</p>
+          <h4 class="preview__name">${this._data.title}</h4>
+          <p class="preview__publisher">${this._data.publisher}</p>
         </div>
       </a>
     </li>`;
-        this.#parentElement.insertAdjacentHTML("afterbegin", html);
-        recipe.bookmarked = true;
+    }
+    handleAddBookmarkEvent(handlerFunctionAdd, handlerFunctionDelete) {
+        _bookmarkButton.addEventListener("click", (e)=>{
+            e.preventDefault();
+            const attributeValueOfUse = this.bookmarkButton.querySelector("use").getAttribute("href").split("#");
+            console.log(attributeValueOfUse);
+            if (attributeValueOfUse[1] === "icon-bookmark-fill") handlerFunctionDelete();
+            else handlerFunctionAdd();
+        });
     }
     delRecipeFromBookmarks(recipe) {
-        const allBookmarkedRecipes = this.#parentElement.querySelectorAll(".preview__link");
+        const allBookmarkedRecipes = this._parentElement.querySelectorAll(".preview__link");
         allBookmarkedRecipes.forEach((currRecipe)=>{
             console.log(currRecipe);
             const currRecipeId = currRecipe.getAttribute("href").split("#");
@@ -3224,11 +3275,11 @@ class BookmarkView {
     delMessage() {
         document.querySelector(".message").style.display = "none";
     }
-    fillBookmarkIcon(icons, e) {
-        e.target.querySelector(".btn--round").querySelector("use").setAttribute("href", `${icons}#icon-bookmark-fill`);
+    fillBookmarkIcon(icons) {
+        this._bookmarkButton.querySelector("use").setAttribute("href", `${icons}#icon-bookmark-fill`);
     }
-    unfillBookmarkIcon(icons, e) {
-        e.target.closest(".btn--round").querySelector("use").setAttribute("href", `${icons}#icon-bookmark`);
+    unfillBookmarkIcon(icons) {
+        this._bookmarkButton.querySelector("use").setAttribute("href", `${icons}#icon-bookmark`);
     }
     bookmarkListener(icons, recipe, bookmarkedRecipes) {
         const bookmarkButton = document.querySelector(".btn--round");
@@ -3255,15 +3306,17 @@ class BookmarkView {
 }
 exports.default = new BookmarkView();
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"6z7bi":[function(require,module,exports) {
+},{"./View.js":"5cUXS","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"6z7bi":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 var _iconsSvg = require("url:../../img/icons.svg");
 var _iconsSvgDefault = parcelHelpers.interopDefault(_iconsSvg);
-class PaginationView {
-    #parentElement = document.querySelector(".pagination");
+var _viewJs = require("./View.js");
+var _viewJsDefault = parcelHelpers.interopDefault(_viewJs);
+class PaginationView extends (0, _viewJsDefault.default) {
+    _parentElement = document.querySelector(".pagination");
     addPrevButton() {
-        this.#parentElement.insertAdjacentHTML("afterbegin", `<button class="btn--inline pagination__btn--prev" data-page-number="1">
+        this._parentElement.insertAdjacentHTML("afterbegin", `<button class="btn--inline pagination__btn--prev" data-page-number="1">
             <svg class="search__icon">
                 <use href="${(0, _iconsSvgDefault.default)}#icon-arrow-left"></use>
             </svg>
@@ -3271,7 +3324,7 @@ class PaginationView {
         </button>`);
     }
     addNextButton() {
-        this.#parentElement.insertAdjacentHTML("beforeend", `<button class="btn--inline pagination__btn--next" data-page-number="3">
+        this._parentElement.insertAdjacentHTML("beforeend", `<button class="btn--inline pagination__btn--next" data-page-number="3">
         <span>Page 3</span>
         <svg class="search__icon">
             <use href="${(0, _iconsSvgDefault.default)}#icon-arrow-right"></use>
@@ -3281,6 +3334,6 @@ class PaginationView {
 }
 exports.default = new PaginationView();
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","url:../../img/icons.svg":"loVOp"}]},["d8XZh","aenu9"], "aenu9", "parcelRequire3a11")
+},{"url:../../img/icons.svg":"loVOp","./View.js":"5cUXS","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}]},["d8XZh","aenu9"], "aenu9", "parcelRequire3a11")
 
 //# sourceMappingURL=index.e37f48ea.js.map

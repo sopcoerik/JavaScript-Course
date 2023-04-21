@@ -109,7 +109,10 @@ class RecipeView extends View {
 
   handleRecipeRenderEvents(handlerFunction) {
     ['hashchange', 'load'].forEach(event =>
-      window.addEventListener(event, handlerFunction)
+      window.addEventListener(event, function (e) {
+        e.preventDefault();
+        handlerFunction();
+      })
     );
   }
 

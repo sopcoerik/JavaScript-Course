@@ -31,7 +31,10 @@ class SearchView extends View {
     document
       .querySelector('.search')
       .querySelector('.search__field')
-      .addEventListener('submit', handlerFunction);
+      .addEventListener('submit', function (e) {
+        e.preventDefault();
+        handlerFunction();
+      });
   }
 }
 

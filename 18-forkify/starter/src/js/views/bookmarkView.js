@@ -28,11 +28,13 @@ class BookmarkView extends View {
   }
 
   handleAddBookmarkEvent(handlerFunctionAdd, handlerFunctionDelete) {
-    _bookmarkButton.addEventListener('click', () => {
+    _bookmarkButton.addEventListener('click', e => {
+      e.preventDefault();
       const attributeValueOfUse = this.bookmarkButton
         .querySelector('use')
         .getAttribute('href')
         .split('#');
+      console.log(attributeValueOfUse);
       if (attributeValueOfUse[1] === 'icon-bookmark-fill')
         handlerFunctionDelete();
       else handlerFunctionAdd();
