@@ -28,7 +28,7 @@ export default class View {
   update(data) {
     this._data = data;
 
-    const newMarkup = _generateMarkup(); // at this point it's just a string so we can not compare it to the current dom
+    const newMarkup = this._generateMarkup(); // at this point it's just a string so we can not compare it to the current dom
     const newDOMFromNewMarkupString = document
       .createRange()
       .createContextualFragment(newMarkup); // we first convert the html string to a DOM obj which lives only in memory, not actual part of DOM
@@ -48,13 +48,6 @@ export default class View {
         newEl.firstChild?.nodeValue.trim() !== ''
       ) {
         currEl.textContent = newEl.textContent;
-      }
-
-      if (!newEl.isEqualNode(currEl)) {
-        Array.from(newDOMElements.attributes).forEach(
-          // here we can set the current elements attributes if they change
-          attribute => currEl.setAttributes(attribute.name, attribute.value)
-        );
       }
     });
   }

@@ -77,7 +77,6 @@ class BookmarkView extends View {
     window.addEventListener('load', handlerFunction);
   }
 
-  // fix console error - when adding first item to bookmarks
   removeMessage() {
     this._parentElement.querySelector('.message').remove();
   }

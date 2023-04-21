@@ -66,21 +66,7 @@ class RecipeView extends View {
         <h2 class="heading--2">Recipe ingredients</h2>
         <ul class="recipe__ingredient-list">
         ${this._data.ingredients
-          .map(ing => {
-            return `
-            <li class="recipe__ingredient">
-                <svg class="recipe__icon">
-                <use href="${icons}#icon-check"></use>
-                </svg>
-                <div class="recipe__quantity">${
-                  ing.quantity ? fracty(ing.quantity) : ''
-                }</div>
-                <span class="recipe__unit">${ing.unit}</span>
-                <span>&nbsp</span>
-                <div class="recipe__description">${ing.description}</div>
-            </li>
-            `;
-          })
+          .map(ing => this.renderIngredient(ing))
           .join('')}
 
         
@@ -118,89 +104,30 @@ class RecipeView extends View {
   }
 
   // todo: implement and use
-  renderIngredient(ingredient) {}
+  renderIngredient(ingredient) {
+    return `
+            <li class="recipe__ingredient">
+                <svg class="recipe__icon">
+                <use href="${icons}#icon-check"></use>
+                </svg>
+                <div class="recipe__quantity">${
+                  ingredient.quantity ? fracty(ingredient.quantity) : ''
+                }</div>
+                <span class="recipe__unit">${ingredient.unit}</span>
+                <span>&nbsp</span>
+                <div class="recipe__description">${ingredient.description}</div>
+            </li>
+            `;
+  }
+
+  addServingsChangeHandler(handlerFunction) {
+    this._parentElement.addEventListener('click', function (e) {
+      if (
+        e.target.closest('.btn--increase-servings') ||
+        e.target.closest('.btn--decrease-servings')
+      )
+        handlerFunction(e);
+    });
+  }
 }
-
-//   decreaseServings(currentRecipe) {
-//     const servings = document.querySelector('.recipe__info-data--people');
-//     if (servings.innerHTML <= 1) servings.innerHTML = 1;
-//     else servings.innerHTML--;
-
-//     const newServingsQuantity = servings.innerHTML;
-
-//     // go over each recipe ingredient ( from js structure )
-//     currentRecipe.ingredients.forEach(ingredient => {
-//       // calculate the new ingredient quantity based on the new servings, starting from the data you have in the recipe data
-//       // get quantity necessary for serving
-//       const quantityPerServing = ingredient.quantity / currentRecipe.servings;
-//       const newIngredientQuantity = (
-//         quantityPerServing * newServingsQuantity
-//       ).toFixed(1);
-
-//       // find the appropriate html element for current ingredient in the loop
-//       // ingredient.description
-//       const ingredientElements = document.querySelectorAll(
-//         '.recipe__ingredient'
-//       );
-//       const ingredientElement = Array.from(ingredientElements).find(
-//         iE =>
-//           iE.querySelector('.recipe__description').innerHTML ===
-//           ingredient.description
-//       );
-
-//       const ingredientQuantityElement =
-//         ingredientElement.querySelector('.recipe__quantity');
-
-//       if (!ingredientQuantityElement.innerHTML) return;
-
-//       ingredientQuantityElement.innerHTML = fracty(newIngredientQuantity);
-//     });
-//   }
-
-//   // todo: use the data from model instead of doing the calculations here
-//   // handler will be in controller. it will call model functions to update servings. then it will update the view. (view.update function?)
-//   increaseServings(currentRecipe) {
-//     const servings = document.querySelector('.recipe__info-data--people');
-//     servings.innerHTML++;
-//     const newServingsQuantity = servings.innerHTML;
-
-//     // go over each recipe ingredient ( from js structure )
-//     currentRecipe.ingredients.forEach(ingredient => {
-//       // calculate the new ingredient quantity based on the new servings, starting from the data you have in the recipe data
-//       // get quantity necessary for serving
-//       const quantityPerServing = ingredient.quantity / currentRecipe.servings;
-//       const newIngredientQuantity = (
-//         quantityPerServing * newServingsQuantity
-//       ).toFixed(1);
-
-//       // find the appropriate html element for current ingredient in the loop
-//       // ingredient.description
-//       const ingredientElements = document.querySelectorAll(
-//         '.recipe__ingredient'
-//       );
-//       const ingredientElement = Array.from(ingredientElements).find(
-//         iE =>
-//           iE.querySelector('.recipe__description').innerHTML ===
-//           ingredient.description
-//       );
-
-//       const ingredientQuantityElement =
-//         ingredientElement.querySelector('.recipe__quantity');
-
-//       if (!ingredientQuantityElement.innerHTML) return;
-
-//       ingredientQuantityElement.innerHTML = fracty(newIngredientQuantity);
-//     });
-//   }
-
-//   servingsChangeListener() {
-//     document
-//       .querySelector('.btn--increase-servings')
-//       .addEventListener('click', () => increaseServings(recipe));
-//     document
-//       .querySelector('.btn--decrease-servings')
-//       .addEventListener('click', () => decreaseServings(recipe));
-//   }
-// }
-
 export default new RecipeView();

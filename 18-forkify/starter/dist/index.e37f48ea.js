@@ -652,11 +652,26 @@ const renderBookmarksOnLoadEvent = ()=>{
     if ((0, _model.state).bookmarks.length === 0) (0, _bookmarkViewDefault.default).renderMessage();
     (0, _model.state).bookmarks.map((bookmarkedRecipe)=>(0, _bookmarkViewDefault.default).render(bookmarkedRecipe));
 };
+const changeServingsAndIngredientQuantity = (e)=>{
+    let servings = (0, _model.state).recipe.servings;
+    if (e.target.closest(".btn--increase-servings")) servings++;
+    if (e.target.closest(".btn--decrease-servings") && servings > 1) servings--;
+    const newServingsQuantity = servings;
+    (0, _model.state).recipe.ingredients.forEach((ing)=>{
+        const quantityPerServing = ing.quantity / (0, _model.state).recipe.servings;
+        const newIngredientQuantity = (quantityPerServing * newServingsQuantity).toFixed(1);
+        if (!ing.quantity) return;
+        ing.quantity = newIngredientQuantity;
+    });
+    (0, _model.state).recipe.servings = newServingsQuantity;
+    (0, _recipeViewDefault.default).update((0, _model.state).recipe);
+};
 const init = ()=>{
     (0, _searchViewDefault.default).addSubmitListener(handleSearchView);
     (0, _recipeViewDefault.default).addRecipeRenderEventListener(handleRecipeView);
     (0, _bookmarkViewDefault.default).addBookmarkEventListener(handleBookmarkView);
     (0, _bookmarkViewDefault.default).addLoadEventListenerForBookmarkMessage(renderBookmarksOnLoadEvent);
+    (0, _recipeViewDefault.default).addServingsChangeHandler(changeServingsAndIngredientQuantity);
 };
 init();
 
@@ -2814,19 +2829,7 @@ class RecipeView extends (0, _viewJsDefault.default) {
     <div class="recipe__ingredients">
         <h2 class="heading--2">Recipe ingredients</h2>
         <ul class="recipe__ingredient-list">
-        ${this._data.ingredients.map((ing)=>{
-            return `
-            <li class="recipe__ingredient">
-                <svg class="recipe__icon">
-                <use href="${0, _iconsSvgDefault.default}#icon-check"></use>
-                </svg>
-                <div class="recipe__quantity">${ing.quantity ? (0, _fractyDefault.default)(ing.quantity) : ""}</div>
-                <span class="recipe__unit">${ing.unit}</span>
-                <span>&nbsp</span>
-                <div class="recipe__description">${ing.description}</div>
-            </li>
-            `;
-        }).join("")}
+        ${this._data.ingredients.map((ing)=>this.renderIngredient(ing)).join("")}
 
         
     <div class="recipe__directions">
@@ -2860,76 +2863,25 @@ class RecipeView extends (0, _viewJsDefault.default) {
             }));
     }
     // todo: implement and use
-    renderIngredient(ingredient) {}
+    renderIngredient(ingredient) {
+        return `
+            <li class="recipe__ingredient">
+                <svg class="recipe__icon">
+                <use href="${0, _iconsSvgDefault.default}#icon-check"></use>
+                </svg>
+                <div class="recipe__quantity">${ingredient.quantity ? (0, _fractyDefault.default)(ingredient.quantity) : ""}</div>
+                <span class="recipe__unit">${ingredient.unit}</span>
+                <span>&nbsp</span>
+                <div class="recipe__description">${ingredient.description}</div>
+            </li>
+            `;
+    }
+    addServingsChangeHandler(handlerFunction) {
+        this._parentElement.addEventListener("click", function(e) {
+            if (e.target.closest(".btn--increase-servings") || e.target.closest(".btn--decrease-servings")) handlerFunction(e);
+        });
+    }
 }
-//   decreaseServings(currentRecipe) {
-//     const servings = document.querySelector('.recipe__info-data--people');
-//     if (servings.innerHTML <= 1) servings.innerHTML = 1;
-//     else servings.innerHTML--;
-//     const newServingsQuantity = servings.innerHTML;
-//     // go over each recipe ingredient ( from js structure )
-//     currentRecipe.ingredients.forEach(ingredient => {
-//       // calculate the new ingredient quantity based on the new servings, starting from the data you have in the recipe data
-//       // get quantity necessary for serving
-//       const quantityPerServing = ingredient.quantity / currentRecipe.servings;
-//       const newIngredientQuantity = (
-//         quantityPerServing * newServingsQuantity
-//       ).toFixed(1);
-//       // find the appropriate html element for current ingredient in the loop
-//       // ingredient.description
-//       const ingredientElements = document.querySelectorAll(
-//         '.recipe__ingredient'
-//       );
-//       const ingredientElement = Array.from(ingredientElements).find(
-//         iE =>
-//           iE.querySelector('.recipe__description').innerHTML ===
-//           ingredient.description
-//       );
-//       const ingredientQuantityElement =
-//         ingredientElement.querySelector('.recipe__quantity');
-//       if (!ingredientQuantityElement.innerHTML) return;
-//       ingredientQuantityElement.innerHTML = fracty(newIngredientQuantity);
-//     });
-//   }
-//   // todo: use the data from model instead of doing the calculations here
-//   // handler will be in controller. it will call model functions to update servings. then it will update the view. (view.update function?)
-//   increaseServings(currentRecipe) {
-//     const servings = document.querySelector('.recipe__info-data--people');
-//     servings.innerHTML++;
-//     const newServingsQuantity = servings.innerHTML;
-//     // go over each recipe ingredient ( from js structure )
-//     currentRecipe.ingredients.forEach(ingredient => {
-//       // calculate the new ingredient quantity based on the new servings, starting from the data you have in the recipe data
-//       // get quantity necessary for serving
-//       const quantityPerServing = ingredient.quantity / currentRecipe.servings;
-//       const newIngredientQuantity = (
-//         quantityPerServing * newServingsQuantity
-//       ).toFixed(1);
-//       // find the appropriate html element for current ingredient in the loop
-//       // ingredient.description
-//       const ingredientElements = document.querySelectorAll(
-//         '.recipe__ingredient'
-//       );
-//       const ingredientElement = Array.from(ingredientElements).find(
-//         iE =>
-//           iE.querySelector('.recipe__description').innerHTML ===
-//           ingredient.description
-//       );
-//       const ingredientQuantityElement =
-//         ingredientElement.querySelector('.recipe__quantity');
-//       if (!ingredientQuantityElement.innerHTML) return;
-//       ingredientQuantityElement.innerHTML = fracty(newIngredientQuantity);
-//     });
-//   }
-//   servingsChangeListener() {
-//     document
-//       .querySelector('.btn--increase-servings')
-//       .addEventListener('click', () => increaseServings(recipe));
-//     document
-//       .querySelector('.btn--decrease-servings')
-//       .addEventListener('click', () => decreaseServings(recipe));
-//   }
-// }
 exports.default = new RecipeView();
 
 },{"url:../../img/icons.svg":"loVOp","../../../node_modules/fracty":"hJO4d","./View.js":"5cUXS","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"loVOp":[function(require,module,exports) {
@@ -3088,7 +3040,7 @@ class View {
     }
     update(data) {
         this._data = data;
-        const newMarkup = _generateMarkup(); // at this point it's just a string so we can not compare it to the current dom
+        const newMarkup = this._generateMarkup(); // at this point it's just a string so we can not compare it to the current dom
         const newDOMFromNewMarkupString = document.createRange().createContextualFragment(newMarkup); // we first convert the html string to a DOM obj which lives only in memory, not actual part of DOM
         const newDOMElements = Array.from(newDOMFromNewMarkupString.querySelectorAll("*")); // and here we take out all the elements from the new DOM object
         const currentDOMElements = Array.from(this._parentElement.querySelectorAll("*")); // we take out the current DOM elements from the parent element where we want to update the view with new data
@@ -3096,8 +3048,6 @@ class View {
             const currEl = currentDOMElements[i];
             // Updates based on TEXT-CHANGE
             if (!newEl.isEqualNode(currEl) && newEl.firstChild?.nodeValue.trim() !== "") currEl.textContent = newEl.textContent;
-            if (!newEl.isEqualNode(currEl)) Array.from(newDOMElements.attributes).forEach(// here we can set the current elements attributes if they change
-            (attribute)=>currEl.setAttributes(attribute.name, attribute.value));
         });
     }
     _clear() {
@@ -3236,7 +3186,6 @@ class BookmarkView extends (0, _viewJsDefault.default) {
     addLoadEventListenerForBookmarkMessage(handlerFunction) {
         window.addEventListener("load", handlerFunction);
     }
-    // fix console error - when adding first item to bookmarks
     removeMessage() {
         this._parentElement.querySelector(".message").remove();
     }

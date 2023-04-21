@@ -7,6 +7,7 @@ import {
   getRecipeData,
   addRecipeToBookmarks,
   deleteRecipeFromBookmarks,
+  updateRecipeServings,
 } from './model';
 
 import RecipeView from './views/recipeView';
@@ -98,6 +99,28 @@ const renderBookmarksOnLoadEvent = () => {
   );
 };
 
+const changeServingsAndIngredientQuantity = e => {
+  let servings = state.recipe.servings;
+
+  if (e.target.closest('.btn--increase-servings')) servings++;
+  if (e.target.closest('.btn--decrease-servings') && servings > 1) servings--;
+
+  const newServingsQuantity = servings;
+
+  state.recipe.ingredients.forEach(ing => {
+    const quantityPerServing = ing.quantity / state.recipe.servings;
+
+    const newIngredientQuantity = (
+      quantityPerServing * newServingsQuantity
+    ).toFixed(1);
+    if (!ing.quantity) return;
+    ing.quantity = newIngredientQuantity;
+  });
+  state.recipe.servings = newServingsQuantity;
+
+  RecipeView.update(state.recipe);
+};
+
 const init = () => {
   SearchView.addSubmitListener(handleSearchView);
   RecipeView.addRecipeRenderEventListener(handleRecipeView);
@@ -105,6 +128,7 @@ const init = () => {
   BookmarkView.addLoadEventListenerForBookmarkMessage(
     renderBookmarksOnLoadEvent
   );
+  RecipeView.addServingsChangeHandler(changeServingsAndIngredientQuantity);
 };
 
 init();
