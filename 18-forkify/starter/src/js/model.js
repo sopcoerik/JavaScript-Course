@@ -109,7 +109,7 @@ export const initBookmarkedRecipes = () => {
 };
 
 const init = () => {
-  state.bookmarks = initBookmarkedRecipes();
+  state.bookmarks = initBookmarkedRecipes() || [];
 };
 
 init();

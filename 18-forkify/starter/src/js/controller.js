@@ -102,6 +102,9 @@ const renderBookmarksOnLoadEvent = () => {
 
 BookmarkView.addLoadEventListenerForBookmarkMessage(renderBookmarksOnLoadEvent);
 
+// todo:
+// create an init function in controller. in which you add listeners
+
 // ------------------------------------------------------------------------------------------------------
 
 // document.querySelector('.bookmarks').addEventListener('click', function (e) {

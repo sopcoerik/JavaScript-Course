@@ -107,6 +107,7 @@ class RecipeView extends View {
     `;
   };
 
+  // move this to controller.
   addRecipeRenderEventListener(handlerFunction) {
     ['hashchange', 'load'].forEach(event =>
       window.addEventListener(event, function (e) {
