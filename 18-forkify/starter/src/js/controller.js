@@ -4,7 +4,13 @@ import fracty from 'fracty';
 
 import icons from 'url:../img/icons.svg';
 import { updateLocalStorage } from './helpers';
-import { getRecipesFromSearch, state, getRecipeData } from './model';
+import {
+  getRecipesFromSearch,
+  state,
+  getRecipeData,
+  addRecipeToBookmarks,
+  deleteRecipeFromBookmarks,
+} from './model';
 import RecipeView from './views/recipeView';
 import SearchView from './views/searchView';
 import BookmarkView from './views/bookmarkView';
@@ -24,6 +30,9 @@ let recipeCurrent;
 PaginationView.addPrevButton();
 PaginationView.addNextButton();
 
+// -------------------------------------------------------------------------------------------------------
+
+// ---------------------Getting Recipes From URL
 const getRecipeIdFromUrl = () => {
   let recipeId;
   if (window.location.hash) recipeId = window.location.hash;
@@ -31,6 +40,7 @@ const getRecipeIdFromUrl = () => {
   return recipeId;
 };
 
+// ---------------------Handling Search View
 const handleSearchView = async () => {
   const query = SearchView.getSearchQuery();
 
@@ -41,9 +51,40 @@ const handleSearchView = async () => {
 
 SearchView.handleSubmitEvent(handleSearchView);
 
-// TODO: move rendering logic to the view
-// TODO: extract business logic in functions with clear names
-// TODO: rendeRecipe is huge and contains code which it is not it's responsibility. Refactor.
+// --------------------Handling Recipe View
+const handleRecipeView = async () => {
+  await getRecipeData(getRecipeIdFromUrl());
+
+  RecipeView.render(state.recipe);
+};
+
+RecipeView.handleRecipeRenderEvents(handleRecipeView);
+
+// -------------------Handling Bookmark View
+const handleAddBookmarkView = () => {
+  BookmarkView.bookmarkViewMessageToggler();
+
+  BookmarkView.fillBookmarkIcon(icons);
+
+  BookmarkView.render(state.recipe);
+
+  addRecipeToBookmarks();
+};
+
+const handleDeleteBookmarkView = () => {
+  BookmarkView.bookmarkViewMessageToggler();
+
+  BookmarkView.unfillBookmarkIcon(icons);
+
+  deleteRecipeFromBookmarks();
+};
+
+BookmarkView.handleBookmarkEvent(
+  handleAddBookmarkView,
+  handleDeleteBookmarkView
+);
+
+// ------------------------------------------------------------------------------------------------------
 
 const initLoadAndRenderRecipe = async () => {
   // RecipeView.showSpinner(true);
@@ -80,8 +121,8 @@ const loadAndRenderRecipe = function () {
   listenForBookmarkButtonClick();
 };
 
-window.addEventListener('load', loadAndRenderRecipe);
-window.addEventListener('hashchange', loadAndRenderRecipe);
+// window.addEventListener('load', loadAndRenderRecipe);
+// window.addEventListener('hashchange', loadAndRenderRecipe);
 
 recipeSearchResults.addEventListener('click', function (e) {
   if (e.target.closest('.preview')) {

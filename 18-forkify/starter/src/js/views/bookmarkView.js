@@ -1,7 +1,17 @@
 import View from './View.js';
 
 class BookmarkView extends View {
+  _bookmarkButton = document.querySelector('.btn--round');
   _parentElement = document.querySelector('.bookmarks__list');
+  _message = `No bookmarks yet. Find a nice recipe and bookmark it :)`;
+
+  bookmarkViewMessageToggler() {
+    if (!this._parentElement.firstChild) {
+      this.renderMessage;
+    } else {
+      this.delMessage();
+    }
+  }
 
   _generateMarkup() {
     return `<li class="preview">
@@ -15,6 +25,18 @@ class BookmarkView extends View {
         </div>
       </a>
     </li>`;
+  }
+
+  handleAddBookmarkEvent(handlerFunctionAdd, handlerFunctionDelete) {
+    _bookmarkButton.addEventListener('click', () => {
+      const attributeValueOfUse = this.bookmarkButton
+        .querySelector('use')
+        .getAttribute('href')
+        .split('#');
+      if (attributeValueOfUse[1] === 'icon-bookmark-fill')
+        handlerFunctionDelete();
+      else handlerFunctionAdd();
+    });
   }
 
   delRecipeFromBookmarks(recipe) {
@@ -34,16 +56,14 @@ class BookmarkView extends View {
     document.querySelector('.message').style.display = 'none';
   }
 
-  fillBookmarkIcon(icons, e) {
-    e.target
-      .querySelector('.btn--round')
+  fillBookmarkIcon(icons) {
+    this._bookmarkButton
       .querySelector('use')
       .setAttribute('href', `${icons}#icon-bookmark-fill`);
   }
 
-  unfillBookmarkIcon(icons, e) {
-    e.target
-      .closest('.btn--round')
+  unfillBookmarkIcon(icons) {
+    this._bookmarkButton
       .querySelector('use')
       .setAttribute('href', `${icons}#icon-bookmark`);
   }

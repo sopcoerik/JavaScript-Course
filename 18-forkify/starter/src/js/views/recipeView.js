@@ -107,6 +107,12 @@ class RecipeView extends View {
     `;
   };
 
+  handleRecipeRenderEvents(handlerFunction) {
+    ['hashchange', 'load'].forEach(event =>
+      window.addEventListener(event, handlerFunction)
+    );
+  }
+
   // todo: implement and use
   renderIngredient(ingredient) {}
 
