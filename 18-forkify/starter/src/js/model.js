@@ -29,7 +29,7 @@ export const getRecipeData = async function (recipeId) {
       title: recipe.title,
     };
   } catch (err) {
-    throw new Error(err);
+    throw err;
   }
 };
 // } catch (err) {

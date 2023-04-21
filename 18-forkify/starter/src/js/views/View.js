@@ -30,8 +30,12 @@ export default class View {
     const newDOMFromNewMarkupString = document
       .createRange()
       .createContextualFragment(newMarkup); // we first convert the html string to a DOM obj which lives only in memory, not actual part of DOM
-    const newDOMElements = newDOMFromNewMarkupString.querySelectorAll('*'); // and here we take out all the elements from the new DOM object
-    const currentDOMElements = this._parentElement.querySelectorAll('*'); // we take out the current DOM elements from the parent element where we want to update the view with new data
+    const newDOMElements = Array.from(
+      newDOMFromNewMarkupString.querySelectorAll('*')
+    ); // and here we take out all the elements from the new DOM object
+    const currentDOMElements = Array.from(
+      this._parentElement.querySelectorAll('*')
+    ); // we take out the current DOM elements from the parent element where we want to update the view with new data
 
     newDOMElements.forEach((newEl, i) => {
       const currEl = currentDOMElements[i];

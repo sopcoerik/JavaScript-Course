@@ -36,7 +36,7 @@ PaginationView.addNextButton();
 const getRecipeIdFromUrl = () => {
   let recipeId;
   if (window.location.hash) recipeId = window.location.hash;
-
+  else return;
   return recipeId;
 };
 
@@ -53,9 +53,14 @@ SearchView.handleSubmitEvent(handleSearchView);
 
 // --------------------Handling Recipe View
 const handleRecipeView = async () => {
-  await getRecipeData(getRecipeIdFromUrl());
+  if (window.location.hash) {
+    const recipeId = getRecipeIdFromUrl();
+    await getRecipeData(recipeId);
 
-  RecipeView.render(state.recipe);
+    RecipeView.render(state.recipe);
+
+    callBookmarkEventHandler();
+  }
 };
 
 RecipeView.handleRecipeRenderEvents(handleRecipeView);
@@ -79,10 +84,12 @@ const handleDeleteBookmarkView = () => {
   deleteRecipeFromBookmarks();
 };
 
-BookmarkView.handleBookmarkEvent(
-  handleAddBookmarkView,
-  handleDeleteBookmarkView
-);
+const callBookmarkEventHandler = () => {
+  BookmarkView.handleBookmarkEvent(
+    handleAddBookmarkView,
+    handleDeleteBookmarkView
+  );
+};
 
 // ------------------------------------------------------------------------------------------------------
 
@@ -151,32 +158,31 @@ document.querySelector('.bookmarks').addEventListener('click', function (e) {
   }
 });
 
-document
-  .querySelector('.search')
-  .addEventListener('submit', async function (e) {
-    e.preventDefault();
-    if (!document.querySelector('.search__field').value) return;
+// document
+//   .querySelector('.search')
+//   .addEventListener('submit', async function (e) {
+//     e.preventDefault();
+//     if (!document.querySelector('.search__field').value) return;
 
-    recipeSearchResults.textContent = '';
+//     recipeSearchResults.textContent = '';
 
-    recipeSearchResults.insertAdjacentHTML(
-      'afterbegin',
-      `
-      <div class="spinner">
-        <svg>
-          <use href="${icons}#icon-loader"></use>
-        </svg>
-      </div>`
-    );
+//     recipeSearchResults.insertAdjacentHTML(
+//       'afterbegin',
+//       `
+//       <div class="spinner">
+//         <svg>
+//           <use href="${icons}#icon-loader"></use>
+//         </svg>
+//       </div>`
+//     );
 
-    const searchedArr = await Model.getRecipesFromSearch();
-    console.log(searchedArr);
-    searchedArr.forEach(rec => SearchView.renderSearchView(rec));
-  });
+//     const searchedArr = await Model.getRecipesFromSearch();
+//     console.log(searchedArr);
+//     searchedArr.forEach(rec => SearchView.renderSearchView(rec));
+//   });
 
 const btnPreviousPage = document.querySelector('.pagination__btn--prev');
 const btnNextPage = document.querySelector('.pagination__btn--next');
-const elementsPerPage = 10;
 
 btnPreviousPage.addEventListener('click', function (e) {
   e.preventDefault();

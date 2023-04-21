@@ -589,6 +589,7 @@ let recipeCurrent;
 const getRecipeIdFromUrl = ()=>{
     let recipeId;
     if (window.location.hash) recipeId = window.location.hash;
+    else return;
     return recipeId;
 };
 // ---------------------Handling Search View
@@ -600,8 +601,12 @@ const handleSearchView = async ()=>{
 (0, _searchViewDefault.default).handleSubmitEvent(handleSearchView);
 // --------------------Handling Recipe View
 const handleRecipeView = async ()=>{
-    await (0, _model.getRecipeData)(getRecipeIdFromUrl());
-    (0, _recipeViewDefault.default).render((0, _model.state).recipe);
+    if (window.location.hash) {
+        const recipeId = getRecipeIdFromUrl();
+        await (0, _model.getRecipeData)(recipeId);
+        (0, _recipeViewDefault.default).render((0, _model.state).recipe);
+        callBookmarkEventHandler();
+    }
 };
 (0, _recipeViewDefault.default).handleRecipeRenderEvents(handleRecipeView);
 // -------------------Handling Bookmark View
@@ -616,7 +621,9 @@ const handleDeleteBookmarkView = ()=>{
     (0, _bookmarkViewDefault.default).unfillBookmarkIcon((0, _iconsSvgDefault.default));
     (0, _model.deleteRecipeFromBookmarks)();
 };
-(0, _bookmarkViewDefault.default).handleBookmarkEvent(handleAddBookmarkView, handleDeleteBookmarkView);
+const callBookmarkEventHandler = ()=>{
+    (0, _bookmarkViewDefault.default).handleBookmarkEvent(handleAddBookmarkView, handleDeleteBookmarkView);
+};
 // ------------------------------------------------------------------------------------------------------
 const initLoadAndRenderRecipe = async ()=>{
     // RecipeView.showSpinner(true);
@@ -663,23 +670,27 @@ document.querySelector(".bookmarks").addEventListener("click", function(e) {
         loadAndRenderRecipe();
     }
 });
-document.querySelector(".search").addEventListener("submit", async function(e) {
-    e.preventDefault();
-    if (!document.querySelector(".search__field").value) return;
-    recipeSearchResults.textContent = "";
-    recipeSearchResults.insertAdjacentHTML("afterbegin", `
-      <div class="spinner">
-        <svg>
-          <use href="${(0, _iconsSvgDefault.default)}#icon-loader"></use>
-        </svg>
-      </div>`);
-    const searchedArr = await Model.getRecipesFromSearch();
-    console.log(searchedArr);
-    searchedArr.forEach((rec)=>(0, _searchViewDefault.default).renderSearchView(rec));
-});
+// document
+//   .querySelector('.search')
+//   .addEventListener('submit', async function (e) {
+//     e.preventDefault();
+//     if (!document.querySelector('.search__field').value) return;
+//     recipeSearchResults.textContent = '';
+//     recipeSearchResults.insertAdjacentHTML(
+//       'afterbegin',
+//       `
+//       <div class="spinner">
+//         <svg>
+//           <use href="${icons}#icon-loader"></use>
+//         </svg>
+//       </div>`
+//     );
+//     const searchedArr = await Model.getRecipesFromSearch();
+//     console.log(searchedArr);
+//     searchedArr.forEach(rec => SearchView.renderSearchView(rec));
+//   });
 const btnPreviousPage = document.querySelector(".pagination__btn--prev");
 const btnNextPage = document.querySelector(".pagination__btn--next");
-const elementsPerPage = 10;
 btnPreviousPage.addEventListener("click", function(e) {
     e.preventDefault();
     let pageNumber = e.target.closest("button").dataset.pageNumber;
@@ -2838,7 +2849,7 @@ const getRecipeData = async function(recipeId) {
             title: recipe.title
         };
     } catch (err) {
-        throw new Error(err);
+        throw err;
     }
 };
 const getRecipesFromSearch = async (query)=>{
@@ -3137,8 +3148,8 @@ class View {
         this._data = data;
         const newMarkup = _generateMarkup(); // at this point it's just a string so we can not compare it to the current dom
         const newDOMFromNewMarkupString = document.createRange().createContextualFragment(newMarkup); // we first convert the html string to a DOM obj which lives only in memory, not actual part of DOM
-        const newDOMElements = newDOMFromNewMarkupString.querySelectorAll("*"); // and here we take out all the elements from the new DOM object
-        const currentDOMElements = this._parentElement.querySelectorAll("*"); // we take out the current DOM elements from the parent element where we want to update the view with new data
+        const newDOMElements = Array.from(newDOMFromNewMarkupString.querySelectorAll("*")); // and here we take out all the elements from the new DOM object
+        const currentDOMElements = Array.from(this._parentElement.querySelectorAll("*")); // we take out the current DOM elements from the parent element where we want to update the view with new data
         newDOMElements.forEach((newEl, i)=>{
             const currEl = currentDOMElements[i];
             // Updates based on TEXT-CHANGE
@@ -3254,8 +3265,8 @@ class BookmarkView extends (0, _viewJsDefault.default) {
       </a>
     </li>`;
     }
-    handleAddBookmarkEvent(handlerFunctionAdd, handlerFunctionDelete) {
-        _bookmarkButton.addEventListener("click", (e)=>{
+    handleBookmarkEvent(handlerFunctionAdd, handlerFunctionDelete) {
+        this._bookmarkButton.addEventListener("click", (e)=>{
             e.preventDefault();
             const attributeValueOfUse = this.bookmarkButton.querySelector("use").getAttribute("href").split("#");
             console.log(attributeValueOfUse);

@@ -27,8 +27,8 @@ class BookmarkView extends View {
     </li>`;
   }
 
-  handleAddBookmarkEvent(handlerFunctionAdd, handlerFunctionDelete) {
-    _bookmarkButton.addEventListener('click', e => {
+  handleBookmarkEvent(handlerFunctionAdd, handlerFunctionDelete) {
+    this._bookmarkButton.addEventListener('click', e => {
       e.preventDefault();
       const attributeValueOfUse = this.bookmarkButton
         .querySelector('use')
