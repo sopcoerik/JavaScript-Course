@@ -620,33 +620,36 @@ const handleSearchView = async ()=>{
 };
 // --------------------Handling Recipe View
 const handleRecipeView = async ()=>{
-    if (window.location.hash) {
-        (0, _recipeViewDefault.default).renderSpinner();
-        const recipeId = getRecipeIdFromUrl();
-        await (0, _model.getRecipeData)(recipeId);
-        (0, _recipeViewDefault.default).render((0, _model.state).recipe);
-        (0, _model.state).bookmarks.forEach((bookmarkedRecipe)=>{
-            if ((0, _model.state).recipe.recipeId === bookmarkedRecipe.recipeId) {
-                (0, _model.state).recipe.bookmarked = true;
-                (0, _bookmarkViewDefault.default).fillBookmarkButton();
-            }
-        });
+    try {
+        if (window.location.hash) {
+            (0, _recipeViewDefault.default).renderSpinner();
+            const recipeId = getRecipeIdFromUrl();
+            await (0, _model.getRecipeData)(recipeId);
+            (0, _recipeViewDefault.default).render((0, _model.state).recipe);
+            (0, _model.state).bookmarks.forEach((bookmarkedRecipe)=>{
+                if ((0, _model.state).recipe.recipeId === bookmarkedRecipe.recipeId) {
+                    (0, _model.state).recipe.bookmarked = true;
+                    (0, _bookmarkViewDefault.default).fillBookmarkButton();
+                }
+            });
+        }
+    } catch (err) {
+        console.log(err);
     }
 };
 // -------------------Handling Bookmark View
 const handleBookmarkView = ()=>{
     if (!(0, _model.state).recipe.bookmarked) {
-        (0, _bookmarkViewDefault.default).bookmarkViewMessageToggler();
         (0, _bookmarkViewDefault.default).render((0, _model.state).recipe);
         (0, _model.addRecipeToBookmarks)((0, _model.state).recipe);
         (0, _bookmarkViewDefault.default).fillBookmarkButton();
-        (0, _bookmarkViewDefault.default).removeMessage();
     } else {
         (0, _bookmarkViewDefault.default).deleteRecipeHTMLFromBookmarks((0, _model.state).recipe);
         (0, _model.deleteRecipeFromBookmarks)((0, _model.state).recipe);
         (0, _bookmarkViewDefault.default).unfillBookmarkButton();
     }
     if ((0, _model.state).bookmarks.length === 0) (0, _bookmarkViewDefault.default).renderMessage();
+    else (0, _bookmarkViewDefault.default).removeMessage();
 };
 const renderBookmarksOnLoadEvent = ()=>{
     if ((0, _model.state).bookmarks.length === 0) (0, _bookmarkViewDefault.default).renderMessage();
@@ -675,7 +678,7 @@ const init = ()=>{
 };
 init();
 
-},{"core-js/modules/es.regexp.flags.js":"gSXXb","core-js/modules/web.immediate.js":"49tUX","regenerator-runtime":"dXNgZ","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./model":"Y4A21","./views/recipeView":"l60JC","./views/searchView":"9OQAM","./views/bookmarkView":"7YaI3","./views/servingsView":"0343m","./views/activeLinksView":"iNVaG"}],"gSXXb":[function(require,module,exports) {
+},{"core-js/modules/es.regexp.flags.js":"gSXXb","core-js/modules/web.immediate.js":"49tUX","regenerator-runtime":"dXNgZ","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./model":"Y4A21","./views/recipeView":"l60JC","./views/searchView":"9OQAM","./views/bookmarkView":"7YaI3","./views/activeLinksView":"iNVaG","./views/servingsView":"0343m"}],"gSXXb":[function(require,module,exports) {
 var global = require("76deb0be408cb4a9");
 var DESCRIPTORS = require("cb935020bf4b0c02");
 var defineBuiltInAccessor = require("ff1c3629469d584f");
@@ -2749,7 +2752,7 @@ const addRecipeToBookmarks = (recipe)=>{
 };
 const deleteRecipeFromBookmarks = (recipe)=>{
     recipe.bookmarked = false;
-    const recipeIndex = state.bookmarks.findIndex((recipeCurr)=>recipe.id === recipeCurr.id);
+    const recipeIndex = state.bookmarks.findIndex((recipeCurr)=>recipe.recipeId === recipeCurr.recipeId);
     state.bookmarks.splice(recipeIndex, 1);
     localStorage.setItem("bookmarkedRecipes", JSON.stringify(state.bookmarks));
 };
@@ -3028,7 +3031,6 @@ var _iconsSvg = require("url:../../img/icons.svg");
 var _iconsSvgDefault = parcelHelpers.interopDefault(_iconsSvg);
 class View {
     _data;
-    _errorMessage;
     _parentElement;
     _message;
     render(data) {
@@ -3077,7 +3079,7 @@ class View {
     `;
         this._parentElement.insertAdjacentHTML("afterbegin", errorMessage);
     }
-    renderMessage() {
+    renderMessage(err) {
         const message = `
     <div class="message">
       <div>
@@ -3086,7 +3088,7 @@ class View {
         </svg>
       </div>
       <p>
-        ${this._message}
+        ${err}
       </p>
     </div>
     `;
@@ -3102,7 +3104,6 @@ var _viewJs = require("./View.js");
 var _viewJsDefault = parcelHelpers.interopDefault(_viewJs);
 class SearchView extends (0, _viewJsDefault.default) {
     _parentElement = document.querySelector(".results");
-    _errorMessage = `No recipes found for your query. Please try again!`;
     getSearchQuery = ()=>{
         return document.querySelector(".search__field").value;
     };
@@ -3192,22 +3193,7 @@ class BookmarkView extends (0, _viewJsDefault.default) {
 }
 exports.default = new BookmarkView();
 
-},{"./View.js":"5cUXS","url:../../img/icons.svg":"loVOp","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"0343m":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-class ServingsView {
-    increaseButton = document.querySelector(".btn--increase-servings");
-    decreaseButton = document.querySelector(".btn--decrease-servings");
-    addIncreaseEventListener(handlerFunction) {
-        this.increaseButton.addEventListener("click", handlerFunction);
-    }
-    addDecreaseEventListener(handlerFunction) {
-        this.decreaseButton.addEventListener("click", handlerFunction);
-    }
-}
-exports.default = new ServingsView();
-
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"iNVaG":[function(require,module,exports) {
+},{"./View.js":"5cUXS","url:../../img/icons.svg":"loVOp","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"iNVaG":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 class PreviewLinks {
@@ -3222,6 +3208,21 @@ class PreviewLinks {
     }
 }
 exports.default = new PreviewLinks();
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"0343m":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+class ServingsView {
+    increaseButton = document.querySelector(".btn--increase-servings");
+    decreaseButton = document.querySelector(".btn--decrease-servings");
+    addIncreaseEventListener(handlerFunction) {
+        this.increaseButton.addEventListener("click", handlerFunction);
+    }
+    addDecreaseEventListener(handlerFunction) {
+        this.decreaseButton.addEventListener("click", handlerFunction);
+    }
+}
+exports.default = new ServingsView();
 
 },{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}]},["d8XZh","aenu9"], "aenu9", "parcelRequire3a11")
 

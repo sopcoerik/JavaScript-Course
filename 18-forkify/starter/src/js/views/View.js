@@ -8,7 +8,6 @@ import icons from 'url:../../img/icons.svg';
 
 export default class View {
   _data;
-  _errorMessage;
   _parentElement;
   _message;
 
@@ -83,7 +82,7 @@ export default class View {
     this._parentElement.insertAdjacentHTML('afterbegin', errorMessage);
   }
 
-  renderMessage() {
+  renderMessage(err) {
     const message = `
     <div class="message">
       <div>
@@ -92,7 +91,7 @@ export default class View {
         </svg>
       </div>
       <p>
-        ${this._message}
+        ${err}
       </p>
     </div>
     `;

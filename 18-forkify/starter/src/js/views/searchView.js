@@ -2,7 +2,6 @@ import View from './View.js';
 
 class SearchView extends View {
   _parentElement = document.querySelector('.results');
-  _errorMessage = `No recipes found for your query. Please try again!`;
 
   getSearchQuery = () => {
     return document.querySelector('.search__field').value;

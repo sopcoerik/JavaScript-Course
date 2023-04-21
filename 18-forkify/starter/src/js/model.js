@@ -94,7 +94,7 @@ export const deleteRecipeFromBookmarks = recipe => {
   recipe.bookmarked = false;
 
   const recipeIndex = state.bookmarks.findIndex(
-    recipeCurr => recipe.id === recipeCurr.id
+    recipeCurr => recipe.recipeId === recipeCurr.recipeId
   );
   state.bookmarks.splice(recipeIndex, 1);
 

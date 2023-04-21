@@ -47,21 +47,25 @@ const handleSearchView = async () => {
 
 // --------------------Handling Recipe View
 const handleRecipeView = async () => {
-  if (window.location.hash) {
-    RecipeView.renderSpinner();
+  try {
+    if (window.location.hash) {
+      RecipeView.renderSpinner();
 
-    const recipeId = getRecipeIdFromUrl();
+      const recipeId = getRecipeIdFromUrl();
 
-    await getRecipeData(recipeId);
+      await getRecipeData(recipeId);
 
-    RecipeView.render(state.recipe);
+      RecipeView.render(state.recipe);
 
-    state.bookmarks.forEach(bookmarkedRecipe => {
-      if (state.recipe.recipeId === bookmarkedRecipe.recipeId) {
-        state.recipe.bookmarked = true;
-        BookmarkView.fillBookmarkButton();
-      }
-    });
+      state.bookmarks.forEach(bookmarkedRecipe => {
+        if (state.recipe.recipeId === bookmarkedRecipe.recipeId) {
+          state.recipe.bookmarked = true;
+          BookmarkView.fillBookmarkButton();
+        }
+      });
+    }
+  } catch (err) {
+    console.log(err);
   }
 };
 
@@ -69,15 +73,11 @@ const handleRecipeView = async () => {
 
 const handleBookmarkView = () => {
   if (!state.recipe.bookmarked) {
-    BookmarkView.bookmarkViewMessageToggler();
-
     BookmarkView.render(state.recipe);
 
     addRecipeToBookmarks(state.recipe);
 
     BookmarkView.fillBookmarkButton();
-
-    BookmarkView.removeMessage();
   } else {
     BookmarkView.deleteRecipeHTMLFromBookmarks(state.recipe);
 
@@ -87,6 +87,8 @@ const handleBookmarkView = () => {
   }
   if (state.bookmarks.length === 0) {
     BookmarkView.renderMessage();
+  } else {
+    BookmarkView.removeMessage();
   }
 };
 
