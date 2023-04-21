@@ -168,6 +168,8 @@ class RecipeView extends View {
     });
   }
 
+  // todo: use the data from model instead of doing the calculations here
+  // handler will be in controller. it will call model functions to update servings. then it will update the view. (view.update function?)
   increaseServings(currentRecipe) {
     const servings = document.querySelector('.recipe__info-data--people');
     servings.innerHTML++;

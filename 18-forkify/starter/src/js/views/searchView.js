@@ -27,7 +27,7 @@ class SearchView extends View {
       .join('');
   }
 
-  handleSubmitEvent(handlerFunction) {
+  addSubmitListener(handlerFunction) {
     document
       .querySelector('.search')
       .querySelector('.search__field')

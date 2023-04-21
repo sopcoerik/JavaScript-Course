@@ -4,6 +4,9 @@ class BookmarkView extends View {
   _bookmarkButton = document.querySelector('.btn--round');
   _parentElement = document.querySelector('.bookmarks__list');
   _message = `No bookmarks yet. Find a nice recipe and bookmark it :)`;
+  /* 
+    this._data structure:
+  */
 
   bookmarkViewMessageToggler() {
     if (!this._parentElement.firstChild) {
@@ -27,7 +30,13 @@ class BookmarkView extends View {
     </li>`;
   }
 
-  handleBookmarkEvent(handlerFunctionAdd, handlerFunctionDelete) {
+  // todo: rename functions. this is not the handler, but the add event listener
+  // use state instead of html values! might need to know about the recipe ?
+  // regular flow: controller tells the view what handler to put in the event listener -> view adds event listener to the elment.
+  // view does not implement behavior!! behavior is implemented in controller and in the model. Controller is the glue that puts it all together.
+  // the handler is implemented in the controller. it decides based on state what to do. it also calls methods from model
+  // add a single handler. that one decides wether to add or delete bookmark.
+  addBookmarkEventHandler(handlerFunctionAdd, handlerFunctionDelete) {
     this._bookmarkButton.addEventListener('click', e => {
       e.preventDefault();
       const attributeValueOfUse = this.bookmarkButton
@@ -41,6 +50,7 @@ class BookmarkView extends View {
     });
   }
 
+//this is not needed
   delRecipeFromBookmarks(recipe) {
     const allBookmarkedRecipes =
       this._parentElement.querySelectorAll('.preview__link');
